@@ -566,7 +566,7 @@ fun SlotDetailsDialog(
     var room by remember { mutableStateOf(slot.room) }
     var showCreateSubjectDialog by remember { mutableStateOf(false) }
 
-    val activeDays = DayOfWeek.values().toList()
+    val activeDays = DayOfWeek.entries
 
     if (showCreateSubjectDialog) {
         var newSubjectName by remember { mutableStateOf("") }
@@ -1074,7 +1074,7 @@ fun LabPromptDialog(
     var dayDropdownExpanded by remember { mutableStateOf(false) }
     var timeDropdownExpanded by remember { mutableStateOf(false) }
 
-    val days = remember { DayOfWeek.values().toList() }
+    val days = remember { DayOfWeek.entries }
     val times = remember { (0..23).map { LocalTime.of(it, 0) } }
 
     AlertDialog(
@@ -1206,7 +1206,7 @@ fun LabPromptDialog(
 private fun parseColor(colorString: String): Color {
     return try {
         Color(android.graphics.Color.parseColor(colorString))
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         AccentBlueLight
     }
 }

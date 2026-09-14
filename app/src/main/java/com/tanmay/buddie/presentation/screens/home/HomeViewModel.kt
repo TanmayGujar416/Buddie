@@ -8,8 +8,8 @@ import com.tanmay.buddie.data.local.entity.SubjectEntity
 import com.tanmay.buddie.domain.repository.ExamRepository
 import com.tanmay.buddie.domain.repository.SubjectRepository
 import com.tanmay.buddie.domain.repository.SubmissionRepository
+import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
-import com.tanmay.buddie.presentation.components.mascot.MascotMoodHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +34,8 @@ data class SubmissionWithSubject(
 class HomeViewModel @Inject constructor(
     private val submissionRepository: SubmissionRepository,
     private val subjectRepository: SubjectRepository,
-    private val examRepository: ExamRepository
+    private val examRepository: ExamRepository,
+    private val getMascotMoodUseCase: GetMascotMoodUseCase
 ) : ViewModel() {
 
     // Cache the previous status before marking done, ensuring undo preserves
@@ -44,8 +45,8 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         submissionRepository.getAllSubmissions(),
         subjectRepository.getAllSubjects(),
-        examRepository.getAllExams()
-    ) { submissions, subjects, exams ->
+        getMascotMoodUseCase()
+    ) { submissions, subjects, mood ->
         val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE }
         val mapped = activeSubmissions
             .map { sub ->
@@ -55,9 +56,6 @@ class HomeViewModel @Inject constructor(
                 )
             }
             .sortedBy { it.submission.deadline } // Most urgent first
-
-        val allDeadlines = activeSubmissions.map { it.deadline } + exams.map { it.datetime }
-        val mood = MascotMoodHelper.calculateMood(allDeadlines)
 
         HomeUiState(
             submissions = mapped,

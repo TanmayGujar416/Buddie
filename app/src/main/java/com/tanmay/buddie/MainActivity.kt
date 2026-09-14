@@ -40,11 +40,31 @@ import com.tanmay.buddie.presentation.theme.AccentBlue
 import com.tanmay.buddie.presentation.theme.AccentBlueLight
 import com.tanmay.buddie.presentation.theme.TextPrimary
 import com.tanmay.buddie.presentation.theme.TextSecondary
+import com.tanmay.buddie.data.datastore.UserPreferences
+import com.tanmay.buddie.service.BubbleService
+import android.provider.Settings
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var userPreferences: UserPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Ensure BubbleService starts on launch if enabled and overlay permission is granted
+        lifecycleScope.launch {
+            userPreferences.floatingBubbleEnabledFlow.collect { enabled ->
+                if (enabled && Settings.canDrawOverlays(this@MainActivity)) {
+                    BubbleService.start(this@MainActivity)
+                }
+            }
+        }
+
         setContent {
             BuddieTheme {
                 val navController = rememberNavController()

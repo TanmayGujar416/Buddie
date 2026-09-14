@@ -27,10 +27,12 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         val INCLUDE_SATURDAY = booleanPreferencesKey("include_saturday")
         val INCLUDE_SUNDAY = booleanPreferencesKey("include_sunday")
         val NOTIFICATION_HOURS_BEFORE = androidx.datastore.preferences.core.intPreferencesKey("notification_hours_before")
+        val FLOATING_BUBBLE_ENABLED = booleanPreferencesKey("floating_bubble_enabled")
     }
 
     val cardStyleFlow: Flow<String> = dataStore.data.map { it[CARD_STYLE] ?: "SPEECH_BUBBLE" }
     val notificationHoursFlow: Flow<Int> = dataStore.data.map { it[NOTIFICATION_HOURS_BEFORE] ?: 24 }
+    val floatingBubbleEnabledFlow: Flow<Boolean> = dataStore.data.map { it[FLOATING_BUBBLE_ENABLED] ?: false }
 
     val includeSaturdayFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[INCLUDE_SATURDAY] ?: false
@@ -46,6 +48,10 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
 
     suspend fun setNotificationHoursBefore(hours: Int) {
         dataStore.edit { it[NOTIFICATION_HOURS_BEFORE] = hours }
+    }
+
+    suspend fun setFloatingBubbleEnabled(enabled: Boolean) {
+        dataStore.edit { it[FLOATING_BUBBLE_ENABLED] = enabled }
     }
 
     suspend fun setIncludeSaturday(include: Boolean) {

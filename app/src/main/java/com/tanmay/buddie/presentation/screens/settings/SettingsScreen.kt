@@ -1,20 +1,38 @@
 package com.tanmay.buddie.presentation.screens.settings
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.tanmay.buddie.presentation.theme.*
+import com.tanmay.buddie.service.BubbleService
 
 @Composable
 fun SettingsScreen(
@@ -22,6 +40,86 @@ fun SettingsScreen(
     onEditTimetableClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var permissionRequested by rememberSaveable { mutableStateOf(false) }
+    var showPermissionExplanation by rememberSaveable { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { _ -> }
+
+    fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    // Re-check overlay permission state onResume (e.g. returning from system settings)
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val hasOverlayPermission = Settings.canDrawOverlays(context)
+                if (permissionRequested) {
+                    permissionRequested = false
+                    if (hasOverlayPermission) {
+                        viewModel.setFloatingBubbleEnabled(true)
+                        showPermissionExplanation = false
+                        checkAndRequestNotificationPermission()
+                        BubbleService.start(context)
+                    } else {
+                        viewModel.setFloatingBubbleEnabled(false)
+                        showPermissionExplanation = true
+                        BubbleService.stop(context)
+                    }
+                } else {
+                    // Reconcile if permission was revoked externally while backgrounded
+                    if (!hasOverlayPermission && uiState.floatingBubbleEnabled) {
+                        viewModel.setFloatingBubbleEnabled(false)
+                        showPermissionExplanation = true
+                        BubbleService.stop(context)
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val onFloatingBubbleToggle: (Boolean) -> Unit = { enabled ->
+        if (enabled) {
+            val hasOverlayPermission = Settings.canDrawOverlays(context)
+            if (hasOverlayPermission) {
+                viewModel.setFloatingBubbleEnabled(true)
+                showPermissionExplanation = false
+                checkAndRequestNotificationPermission()
+                BubbleService.start(context)
+            } else {
+                permissionRequested = true
+                showPermissionExplanation = false
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:${context.packageName}")
+                )
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.w("SettingsScreen", "Failed to open package-specific overlay settings, falling back to general settings", e)
+                    context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+                }
+            }
+        } else {
+            permissionRequested = false
+            showPermissionExplanation = false
+            viewModel.setFloatingBubbleEnabled(false)
+            BubbleService.stop(context)
+        }
+    }
 
     Scaffold(
         containerColor = CharcoalBackground
@@ -62,6 +160,95 @@ fun SettingsScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+                // Floating Reminder Bubble section
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Floating Reminder Bubble",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                    Text(
+                        text = "Show a floating companion overlay for deadlines and exams",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+
+                    Card(
+                        shape = CardShape,
+                        colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                        border = BorderStroke(1.dp, BorderOutline),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 12.dp)
+                                ) {
+                                    Text(
+                                        text = "Enable floating reminder bubble",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium,
+                                        color = TextPrimary
+                                    )
+                                    Text(
+                                        text = "Floating mascot bubble visible over other apps",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TextSecondary
+                                    )
+                                }
+
+                                Switch(
+                                    checked = uiState.floatingBubbleEnabled,
+                                    onCheckedChange = onFloatingBubbleToggle,
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = TextPrimary,
+                                        checkedTrackColor = AccentBlue,
+                                        checkedBorderColor = AccentBlue,
+                                        uncheckedThumbColor = TextSecondary,
+                                        uncheckedTrackColor = CharcoalSurfaceElevated,
+                                        uncheckedBorderColor = BorderOutline
+                                    )
+                                )
+                            }
+
+                            if (showPermissionExplanation) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.padding(top = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = StatusError,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = "Needed for the floating bubble to work",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = StatusError,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Divider(color = DividerFaint, thickness = 0.5.dp)
+
                 // Card Style section
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(

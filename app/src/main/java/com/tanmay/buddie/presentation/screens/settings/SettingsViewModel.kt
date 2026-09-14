@@ -13,7 +13,8 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val cardStyle: String = "SPEECH_BUBBLE",
-    val notificationHours: Int = 24
+    val notificationHours: Int = 24,
+    val floatingBubbleEnabled: Boolean = false
 )
 
 @HiltViewModel
@@ -23,11 +24,13 @@ class SettingsViewModel @Inject constructor(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         userPreferences.cardStyleFlow,
-        userPreferences.notificationHoursFlow
-    ) { cardStyle, notificationHours ->
+        userPreferences.notificationHoursFlow,
+        userPreferences.floatingBubbleEnabledFlow
+    ) { cardStyle, notificationHours, floatingBubbleEnabled ->
         SettingsUiState(
             cardStyle = cardStyle,
-            notificationHours = notificationHours
+            notificationHours = notificationHours,
+            floatingBubbleEnabled = floatingBubbleEnabled
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsUiState())
 
@@ -41,6 +44,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.setNotificationHoursBefore(hours)
             // Note: Trigger WorkManager to reschedule all notifications based on new preference
+        }
+    }
+
+    fun setFloatingBubbleEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setFloatingBubbleEnabled(enabled)
         }
     }
 }

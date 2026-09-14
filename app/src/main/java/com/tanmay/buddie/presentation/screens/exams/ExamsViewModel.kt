@@ -8,8 +8,8 @@ import com.tanmay.buddie.data.local.entity.SubjectEntity
 import com.tanmay.buddie.domain.repository.ExamRepository
 import com.tanmay.buddie.domain.repository.SubjectRepository
 import com.tanmay.buddie.domain.repository.SubmissionRepository
+import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
-import com.tanmay.buddie.presentation.components.mascot.MascotMoodHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,15 +33,15 @@ data class ExamsUiState(
 class ExamsViewModel @Inject constructor(
     private val examRepository: ExamRepository,
     private val subjectRepository: SubjectRepository,
-    private val submissionRepository: SubmissionRepository
+    private val submissionRepository: SubmissionRepository,
+    private val getMascotMoodUseCase: GetMascotMoodUseCase
 ) : ViewModel() {
 
     val uiState: StateFlow<ExamsUiState> = combine(
         examRepository.getAllExams(),
         subjectRepository.getAllSubjects(),
-        submissionRepository.getAllSubmissions()
-    ) { exams, subjects, submissions ->
-        val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE }
+        getMascotMoodUseCase()
+    ) { exams, subjects, mood ->
         val mapped = exams
             .filter { it.datetime.isAfter(java.time.LocalDateTime.now().minusDays(1)) } // Filter out old exams
             .map { exam ->
@@ -51,9 +51,6 @@ class ExamsViewModel @Inject constructor(
                 )
             }
             .sortedBy { it.exam.datetime } // Closest first
-
-        val allDeadlines = activeSubmissions.map { it.deadline } + exams.map { it.datetime }
-        val mood = MascotMoodHelper.calculateMood(allDeadlines)
 
         ExamsUiState(
             exams = mapped,

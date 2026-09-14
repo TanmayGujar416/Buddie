@@ -8,6 +8,7 @@ import com.tanmay.buddie.presentation.screens.home.HomeViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.settings.SettingsViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel_HiltModules;
+import com.tanmay.buddie.service.BubbleService_GeneratedInjector;
 import dagger.Binds;
 import dagger.Component;
 import dagger.Module;
@@ -149,7 +150,8 @@ public final class BuddieApp_HiltComponents {
 
   @Subcomponent
   @ServiceScoped
-  public abstract static class ServiceC implements ServiceComponent,
+  public abstract static class ServiceC implements BubbleService_GeneratedInjector,
+      ServiceComponent,
       GeneratedComponent {
     @Subcomponent.Builder
     abstract interface Builder extends ServiceComponentBuilder {

@@ -3,6 +3,7 @@ package com.tanmay.buddie.presentation.screens.exams;
 import com.tanmay.buddie.domain.repository.ExamRepository;
 import com.tanmay.buddie.domain.repository.SubjectRepository;
 import com.tanmay.buddie.domain.repository.SubmissionRepository;
+import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
@@ -30,27 +31,33 @@ public final class ExamsViewModel_Factory implements Factory<ExamsViewModel> {
 
   private final Provider<SubmissionRepository> submissionRepositoryProvider;
 
+  private final Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider;
+
   public ExamsViewModel_Factory(Provider<ExamRepository> examRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
-      Provider<SubmissionRepository> submissionRepositoryProvider) {
+      Provider<SubmissionRepository> submissionRepositoryProvider,
+      Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider) {
     this.examRepositoryProvider = examRepositoryProvider;
     this.subjectRepositoryProvider = subjectRepositoryProvider;
     this.submissionRepositoryProvider = submissionRepositoryProvider;
+    this.getMascotMoodUseCaseProvider = getMascotMoodUseCaseProvider;
   }
 
   @Override
   public ExamsViewModel get() {
-    return newInstance(examRepositoryProvider.get(), subjectRepositoryProvider.get(), submissionRepositoryProvider.get());
+    return newInstance(examRepositoryProvider.get(), subjectRepositoryProvider.get(), submissionRepositoryProvider.get(), getMascotMoodUseCaseProvider.get());
   }
 
   public static ExamsViewModel_Factory create(Provider<ExamRepository> examRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
-      Provider<SubmissionRepository> submissionRepositoryProvider) {
-    return new ExamsViewModel_Factory(examRepositoryProvider, subjectRepositoryProvider, submissionRepositoryProvider);
+      Provider<SubmissionRepository> submissionRepositoryProvider,
+      Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider) {
+    return new ExamsViewModel_Factory(examRepositoryProvider, subjectRepositoryProvider, submissionRepositoryProvider, getMascotMoodUseCaseProvider);
   }
 
   public static ExamsViewModel newInstance(ExamRepository examRepository,
-      SubjectRepository subjectRepository, SubmissionRepository submissionRepository) {
-    return new ExamsViewModel(examRepository, subjectRepository, submissionRepository);
+      SubjectRepository subjectRepository, SubmissionRepository submissionRepository,
+      GetMascotMoodUseCase getMascotMoodUseCase) {
+    return new ExamsViewModel(examRepository, subjectRepository, submissionRepository, getMascotMoodUseCase);
   }
 }

@@ -35,7 +35,7 @@ class TimetableViewModel @Inject constructor(
         timetableRepository.getAllSlots(),
         subjectRepository.getAllSubjects()
     ) { slots, subjects ->
-        val days = DayOfWeek.values().toList()
+        val days = DayOfWeek.entries
 
         val enrichedSlots = slots.map { slot ->
             SlotWithSubject(

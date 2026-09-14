@@ -49,7 +49,7 @@ fun SubjectDropdown(
             leadingIcon = {
                 if (selectedSubject != null) {
                     val colorStr = selectedSubject.color ?: "#888888"
-                    val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch(e: Exception) { AccentBlueLight }
+                    val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch (_: Exception) { AccentBlueLight }
                     Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(color))
                 }
             },
@@ -73,7 +73,7 @@ fun SubjectDropdown(
         ) {
             subjects.forEach { subject ->
                 val colorStr = subject.color ?: "#888888"
-                val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch(e: Exception) { AccentBlueLight }
+                val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch (_: Exception) { AccentBlueLight }
 
                 DropdownMenuItem(
                     text = { Text(subject.name, color = TextPrimary) },

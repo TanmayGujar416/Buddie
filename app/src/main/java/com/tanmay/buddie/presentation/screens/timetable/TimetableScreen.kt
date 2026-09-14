@@ -322,7 +322,7 @@ fun TimetableScreen(
 private fun parseColor(colorString: String): Color {
     return try {
         Color(android.graphics.Color.parseColor(colorString))
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         AccentBlueLight
     }
 }

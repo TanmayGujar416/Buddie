@@ -22,7 +22,7 @@ import javax.inject.Inject
 data class SetupUiState(
     val subjects: List<SubjectEntity> = emptyList(),
     val slots: List<TimetableSlotEntity> = emptyList(),
-    val activeDays: List<DayOfWeek> = DayOfWeek.values().toList(),
+    val activeDays: List<DayOfWeek> = DayOfWeek.entries,
     val selectedDay: DayOfWeek? = null,
     val selectedTime: LocalTime? = null,
     val showSubjectPicker: Boolean = false,
@@ -48,7 +48,7 @@ class TimetableSetupViewModel @Inject constructor(
         state.copy(
             subjects = subjects,
             slots = slots,
-            activeDays = DayOfWeek.values().toList()
+            activeDays = DayOfWeek.entries
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SetupUiState())
 
