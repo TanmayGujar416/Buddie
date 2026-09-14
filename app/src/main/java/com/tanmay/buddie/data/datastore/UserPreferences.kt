@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -12,6 +13,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+
+enum class BubbleEdge {
+    LEFT,
+    RIGHT
+}
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_settings")
 
@@ -23,16 +29,25 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
     companion object {
         val CARD_STYLE = stringPreferencesKey("card_style")
         val BUBBLE_EDGE = stringPreferencesKey("bubble_edge")
-        val BUBBLE_POSITION_Y = stringPreferencesKey("bubble_position_y") // Stored as string or float
+        val BUBBLE_POSITION_Y = intPreferencesKey("bubble_position_y")
         val INCLUDE_SATURDAY = booleanPreferencesKey("include_saturday")
         val INCLUDE_SUNDAY = booleanPreferencesKey("include_sunday")
-        val NOTIFICATION_HOURS_BEFORE = androidx.datastore.preferences.core.intPreferencesKey("notification_hours_before")
+        val NOTIFICATION_HOURS_BEFORE = intPreferencesKey("notification_hours_before")
         val FLOATING_BUBBLE_ENABLED = booleanPreferencesKey("floating_bubble_enabled")
     }
 
     val cardStyleFlow: Flow<String> = dataStore.data.map { it[CARD_STYLE] ?: "SPEECH_BUBBLE" }
     val notificationHoursFlow: Flow<Int> = dataStore.data.map { it[NOTIFICATION_HOURS_BEFORE] ?: 24 }
     val floatingBubbleEnabledFlow: Flow<Boolean> = dataStore.data.map { it[FLOATING_BUBBLE_ENABLED] ?: false }
+
+    val bubbleEdgeFlow: Flow<BubbleEdge> = dataStore.data.map { preferences ->
+        val edgeStr = preferences[BUBBLE_EDGE]
+        if (edgeStr == BubbleEdge.LEFT.name) BubbleEdge.LEFT else BubbleEdge.RIGHT
+    }
+
+    val bubblePositionYFlow: Flow<Int?> = dataStore.data.map { preferences ->
+        preferences[BUBBLE_POSITION_Y]
+    }
 
     val includeSaturdayFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[INCLUDE_SATURDAY] ?: false
@@ -63,6 +78,13 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
     suspend fun setIncludeSunday(include: Boolean) {
         dataStore.edit { preferences ->
             preferences[INCLUDE_SUNDAY] = include
+        }
+    }
+
+    suspend fun setBubblePosition(edge: BubbleEdge, positionY: Int) {
+        dataStore.edit { preferences ->
+            preferences[BUBBLE_EDGE] = edge.name
+            preferences[BUBBLE_POSITION_Y] = positionY
         }
     }
 }

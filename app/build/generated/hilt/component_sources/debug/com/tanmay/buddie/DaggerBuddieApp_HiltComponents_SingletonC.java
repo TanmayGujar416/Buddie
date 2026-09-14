@@ -599,6 +599,7 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     private BubbleService injectBubbleService2(BubbleService instance) {
       BubbleService_MembersInjector.injectGetMascotMoodUseCase(instance, singletonCImpl.getMascotMoodUseCaseProvider.get());
+      BubbleService_MembersInjector.injectUserPreferences(instance, singletonCImpl.userPreferencesProvider.get());
       return instance;
     }
   }
