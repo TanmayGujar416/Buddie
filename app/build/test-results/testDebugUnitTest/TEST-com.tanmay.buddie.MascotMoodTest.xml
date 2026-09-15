@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.MascotMoodTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-14T17:36:35" hostname="LAPTOP-0JF3IUAT" time="0.013">
+<testsuite name="com.tanmay.buddie.MascotMoodTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-15T05:33:30" hostname="LAPTOP-0JF3IUAT" time="0.015">
   <properties/>
-  <testcase name="testOverdueTakesPrecedenceOverUrgent" classname="com.tanmay.buddie.MascotMoodTest" time="0.01"/>
-  <testcase name="testDeadlineWithin24HoursReturnsUrgent" classname="com.tanmay.buddie.MascotMoodTest" time="0.001"/>
-  <testcase name="testEmptyDeadlinesReturnsCalm" classname="com.tanmay.buddie.MascotMoodTest" time="0.001"/>
+  <testcase name="testOverdueTakesPrecedenceOverUrgent" classname="com.tanmay.buddie.MascotMoodTest" time="0.012"/>
+  <testcase name="testDeadlineWithin24HoursReturnsUrgent" classname="com.tanmay.buddie.MascotMoodTest" time="0.002"/>
+  <testcase name="testEmptyDeadlinesReturnsCalm" classname="com.tanmay.buddie.MascotMoodTest" time="0.0"/>
   <testcase name="testDeadlinesInTwoToThreeDaysReturnsAware" classname="com.tanmay.buddie.MascotMoodTest" time="0.0"/>
   <testcase name="testDeadlinesFarAwayReturnsCalm" classname="com.tanmay.buddie.MascotMoodTest" time="0.0"/>
-  <testcase name="testOverdueDeadlineReturnsOverdue" classname="com.tanmay.buddie.MascotMoodTest" time="0.001"/>
+  <testcase name="testOverdueDeadlineReturnsOverdue" classname="com.tanmay.buddie.MascotMoodTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -34,11 +34,13 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         val INCLUDE_SUNDAY = booleanPreferencesKey("include_sunday")
         val NOTIFICATION_HOURS_BEFORE = intPreferencesKey("notification_hours_before")
         val FLOATING_BUBBLE_ENABLED = booleanPreferencesKey("floating_bubble_enabled")
+        val BATTERY_OPTIMIZATION_PROMPT_DISMISSED = booleanPreferencesKey("battery_optimization_prompt_dismissed")
     }
 
     val cardStyleFlow: Flow<String> = dataStore.data.map { it[CARD_STYLE] ?: "SPEECH_BUBBLE" }
     val notificationHoursFlow: Flow<Int> = dataStore.data.map { it[NOTIFICATION_HOURS_BEFORE] ?: 24 }
     val floatingBubbleEnabledFlow: Flow<Boolean> = dataStore.data.map { it[FLOATING_BUBBLE_ENABLED] ?: false }
+    val batteryOptimizationPromptDismissedFlow: Flow<Boolean> = dataStore.data.map { it[BATTERY_OPTIMIZATION_PROMPT_DISMISSED] ?: false }
 
     val bubbleEdgeFlow: Flow<BubbleEdge> = dataStore.data.map { preferences ->
         val edgeStr = preferences[BUBBLE_EDGE]
@@ -67,6 +69,10 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
 
     suspend fun setFloatingBubbleEnabled(enabled: Boolean) {
         dataStore.edit { it[FLOATING_BUBBLE_ENABLED] = enabled }
+    }
+
+    suspend fun setBatteryOptimizationPromptDismissed(dismissed: Boolean) {
+        dataStore.edit { it[BATTERY_OPTIMIZATION_PROMPT_DISMISSED] = dismissed }
     }
 
     suspend fun setIncludeSaturday(include: Boolean) {

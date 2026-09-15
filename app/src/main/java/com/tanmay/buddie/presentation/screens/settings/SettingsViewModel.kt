@@ -14,7 +14,8 @@ import javax.inject.Inject
 data class SettingsUiState(
     val cardStyle: String = "SPEECH_BUBBLE",
     val notificationHours: Int = 24,
-    val floatingBubbleEnabled: Boolean = false
+    val floatingBubbleEnabled: Boolean = false,
+    val batteryOptimizationPromptDismissed: Boolean = false
 )
 
 @HiltViewModel
@@ -25,12 +26,14 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = combine(
         userPreferences.cardStyleFlow,
         userPreferences.notificationHoursFlow,
-        userPreferences.floatingBubbleEnabledFlow
-    ) { cardStyle, notificationHours, floatingBubbleEnabled ->
+        userPreferences.floatingBubbleEnabledFlow,
+        userPreferences.batteryOptimizationPromptDismissedFlow
+    ) { cardStyle, notificationHours, floatingBubbleEnabled, batteryOptDismissed ->
         SettingsUiState(
             cardStyle = cardStyle,
             notificationHours = notificationHours,
-            floatingBubbleEnabled = floatingBubbleEnabled
+            floatingBubbleEnabled = floatingBubbleEnabled,
+            batteryOptimizationPromptDismissed = batteryOptDismissed
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsUiState())
 
@@ -50,6 +53,12 @@ class SettingsViewModel @Inject constructor(
     fun setFloatingBubbleEnabled(enabled: Boolean) {
         viewModelScope.launch {
             userPreferences.setFloatingBubbleEnabled(enabled)
+        }
+    }
+
+    fun dismissBatteryOptimizationPrompt() {
+        viewModelScope.launch {
+            userPreferences.setBatteryOptimizationPromptDismissed(true)
         }
     }
 }

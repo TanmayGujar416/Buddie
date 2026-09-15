@@ -1,4 +1,4 @@
-﻿package com.tanmay.buddie
+package com.tanmay.buddie
 
 import com.tanmay.buddie.presentation.screens.settings.SettingsUiState
 import org.junit.Assert.assertEquals
@@ -21,10 +21,22 @@ class SettingsUiStateTest {
         val state = SettingsUiState(
             cardStyle = "COMPANION_HEADER",
             notificationHours = 48,
-            floatingBubbleEnabled = true
+            floatingBubbleEnabled = true,
+            batteryOptimizationPromptDismissed = false
         )
         assertTrue(state.floatingBubbleEnabled)
         assertEquals("COMPANION_HEADER", state.cardStyle)
         assertEquals(48, state.notificationHours)
+        assertFalse(state.batteryOptimizationPromptDismissed)
+    }
+
+    @Test
+    fun settingsUiState_withBatteryOptimizationDismissed() {
+        val state = SettingsUiState(
+            floatingBubbleEnabled = true,
+            batteryOptimizationPromptDismissed = true
+        )
+        assertTrue(state.floatingBubbleEnabled)
+        assertTrue(state.batteryOptimizationPromptDismissed)
     }
 }

@@ -8,6 +8,7 @@ import com.tanmay.buddie.presentation.screens.home.HomeViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.settings.SettingsViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel_HiltModules;
+import com.tanmay.buddie.receiver.BootReceiver;
 import com.tanmay.buddie.service.BubbleService_GeneratedInjector;
 import dagger.Binds;
 import dagger.Component;
@@ -141,6 +142,7 @@ public final class BuddieApp_HiltComponents {
   )
   @Singleton
   public abstract static class SingletonC implements BuddieApp_GeneratedInjector,
+      BootReceiver.BootReceiverEntryPoint,
       FragmentGetContextFix.FragmentGetContextFixEntryPoint,
       HiltWrapper_ActivityRetainedComponentManager_ActivityRetainedComponentBuilderEntryPoint,
       ServiceComponentManager.ServiceComponentBuilderEntryPoint,

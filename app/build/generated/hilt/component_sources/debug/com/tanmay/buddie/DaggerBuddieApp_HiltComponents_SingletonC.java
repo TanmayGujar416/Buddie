@@ -600,6 +600,10 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
     private BubbleService injectBubbleService2(BubbleService instance) {
       BubbleService_MembersInjector.injectGetMascotMoodUseCase(instance, singletonCImpl.getMascotMoodUseCaseProvider.get());
       BubbleService_MembersInjector.injectUserPreferences(instance, singletonCImpl.userPreferencesProvider.get());
+      BubbleService_MembersInjector.injectSubmissionRepository(instance, singletonCImpl.provideSubmissionRepositoryProvider.get());
+      BubbleService_MembersInjector.injectSubjectRepository(instance, singletonCImpl.provideSubjectRepositoryProvider.get());
+      BubbleService_MembersInjector.injectTimetableRepository(instance, singletonCImpl.provideTimetableRepositoryProvider.get());
+      BubbleService_MembersInjector.injectExamRepository(instance, singletonCImpl.provideExamRepositoryProvider.get());
       return instance;
     }
   }
@@ -642,6 +646,11 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     @Override
     public void injectBuddieApp(BuddieApp buddieApp) {
+    }
+
+    @Override
+    public UserPreferences userPreferences() {
+      return userPreferencesProvider.get();
     }
 
     @Override

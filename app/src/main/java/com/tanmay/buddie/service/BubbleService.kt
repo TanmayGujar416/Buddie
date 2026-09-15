@@ -21,19 +21,39 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -46,27 +66,48 @@ import com.tanmay.buddie.MainActivity
 import com.tanmay.buddie.R
 import com.tanmay.buddie.data.datastore.BubbleEdge
 import com.tanmay.buddie.data.datastore.UserPreferences
+import com.tanmay.buddie.domain.repository.ExamRepository
+import com.tanmay.buddie.domain.repository.SubjectRepository
+import com.tanmay.buddie.domain.repository.SubmissionRepository
+import com.tanmay.buddie.domain.repository.TimetableRepository
 import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase
 import com.tanmay.buddie.presentation.components.mascot.BuddieMascot
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
+import com.tanmay.buddie.presentation.components.mascot.card.MascotCardContainer
+import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel
+import com.tanmay.buddie.presentation.screens.home.HomeViewModel
+import com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.hypot
 
 @AndroidEntryPoint
-class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
+class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner, HasDefaultViewModelProviderFactory {
 
     @Inject
     lateinit var getMascotMoodUseCase: GetMascotMoodUseCase
 
     @Inject
     lateinit var userPreferences: UserPreferences
+
+    @Inject
+    lateinit var submissionRepository: SubmissionRepository
+
+    @Inject
+    lateinit var subjectRepository: SubjectRepository
+
+    @Inject
+    lateinit var timetableRepository: TimetableRepository
+
+    @Inject
+    lateinit var examRepository: ExamRepository
 
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
@@ -82,10 +123,31 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
     override val viewModelStore: ViewModelStore
         get() = _viewModelStore
 
+    override val defaultViewModelProviderFactory: ViewModelProvider.Factory
+        get() = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return when {
+                    modelClass.isAssignableFrom(HomeViewModel::class.java) ->
+                        HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase) as T
+                    modelClass.isAssignableFrom(TimetableViewModel::class.java) ->
+                        TimetableViewModel(timetableRepository, subjectRepository) as T
+                    modelClass.isAssignableFrom(ExamsViewModel::class.java) ->
+                        ExamsViewModel(examRepository, subjectRepository, submissionRepository, getMascotMoodUseCase) as T
+                    else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+                }
+            }
+        }
+
+    private val homeViewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
+    private val timetableViewModel by lazy { ViewModelProvider(this)[TimetableViewModel::class.java] }
+    private val examsViewModel by lazy { ViewModelProvider(this)[ExamsViewModel::class.java] }
+
     private var windowManager: WindowManager? = null
     private var bubbleView: ComposeView? = null
     private var snapAnimator: ValueAnimator? = null
     private var isAttaching = false
+    private var isExpanded by mutableStateOf(false)
 
     companion object {
         const val CHANNEL_ID = "buddie_floating_bubble_channel"
@@ -213,15 +275,65 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
             setContent {
                 val mood by getMascotMoodUseCase().collectAsState(initial = MascotMood.CALM)
+                val cardStyle by userPreferences.cardStyleFlow.collectAsState(initial = "SPEECH_BUBBLE")
+
                 Box(
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    BuddieMascot(
-                        mood = mood,
-                        size = 48.dp,
-                        animateIdle = true
-                    )
+                    // Expanded Card Overlay
+                    AnimatedVisibility(
+                        visible = isExpanded,
+                        enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.88f, animationSpec = tween(220)),
+                        exit = fadeOut(animationSpec = tween(180)) + scaleOut(targetScale = 0.88f, animationSpec = tween(180))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.45f))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    collapseBubble(layoutParams, bubbleSizePx)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .widthIn(max = 380.dp)
+                                    .fillMaxWidth(0.92f)
+                                    .padding(16.dp)
+                            ) {
+                                MascotCardContainer(
+                                    cardStyle = cardStyle,
+                                    mood = mood,
+                                    homeViewModel = homeViewModel,
+                                    timetableViewModel = timetableViewModel,
+                                    examsViewModel = examsViewModel,
+                                    onCollapse = { collapseBubble(layoutParams, bubbleSizePx) },
+                                    onOpenApp = {
+                                        collapseBubble(layoutParams, bubbleSizePx)
+                                        openMainActivity()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Collapsed Mascot Bubble
+                    if (!isExpanded) {
+                        Box(
+                            modifier = Modifier.size(48.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BuddieMascot(
+                                mood = mood,
+                                size = 48.dp,
+                                animateIdle = true
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -234,6 +346,10 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
 
         composeView.setOnTouchListener { v, event ->
+            if (isExpanded) {
+                // When expanded, Compose handles clicks and scrolling
+                return@setOnTouchListener false
+            }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     snapAnimator?.cancel()
@@ -272,7 +388,7 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
                         snapToEdge(layoutParams, bubbleSizePx, marginPx)
                     } else {
                         v.performClick()
-                        openMainActivity()
+                        expandBubble(layoutParams)
                     }
                     true
                 }
@@ -294,6 +410,56 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             stopSelf()
         } catch (e: Exception) {
             Log.e("BubbleService", "Failed to add bubble overlay to WindowManager", e)
+        }
+    }
+
+    private fun expandBubble(currentLayoutParams: WindowManager.LayoutParams) {
+        if (isExpanded) return
+        val wm = windowManager ?: return
+        val view = bubbleView ?: return
+
+        currentLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+        currentLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+        currentLayoutParams.x = 0
+        currentLayoutParams.y = 0
+        currentLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        try {
+            wm.updateViewLayout(view, currentLayoutParams)
+        } catch (e: Exception) {
+            Log.e("BubbleService", "Failed to update layout to expanded", e)
+        }
+        isExpanded = true
+    }
+
+    private fun collapseBubble(currentLayoutParams: WindowManager.LayoutParams, bubbleSizePx: Int) {
+        if (!isExpanded) return
+        val wm = windowManager ?: return
+        val view = bubbleView ?: return
+
+        isExpanded = false
+        serviceScope.launch {
+            delay(180L)
+            if (!isExpanded && bubbleView != null) {
+                val (screenWidth, screenHeight) = getScreenDimensions()
+                val savedEdge = try { userPreferences.bubbleEdgeFlow.first() } catch (_: Exception) { BubbleEdge.RIGHT }
+                val savedY = try { userPreferences.bubblePositionYFlow.first() } catch (_: Exception) { null }
+                val marginPx = (8 * resources.displayMetrics.density).toInt()
+                val bubbleX = if (savedEdge == BubbleEdge.LEFT) marginPx else (screenWidth - bubbleSizePx - marginPx).coerceAtLeast(0)
+                val minY = (24 * resources.displayMetrics.density).toInt()
+                val maxY = (screenHeight - bubbleSizePx - (48 * resources.displayMetrics.density).toInt()).coerceAtLeast(minY)
+                val bubbleY = (savedY ?: ((screenHeight - bubbleSizePx) / 2)).coerceIn(minY, maxY)
+
+                currentLayoutParams.width = bubbleSizePx
+                currentLayoutParams.height = bubbleSizePx
+                currentLayoutParams.x = bubbleX
+                currentLayoutParams.y = bubbleY
+                currentLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                try {
+                    wm.updateViewLayout(view, currentLayoutParams)
+                } catch (e: Exception) {
+                    Log.e("BubbleService", "Failed to update layout to collapsed", e)
+                }
+            }
         }
     }
 
@@ -324,7 +490,7 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             duration = 250L
             interpolator = DecelerateInterpolator()
             addUpdateListener { animation ->
-                if (bubbleView != null) {
+                if (bubbleView != null && !isExpanded) {
                     layoutParams.x = animation.animatedValue as Int
                     try {
                         wm.updateViewLayout(view, layoutParams)
