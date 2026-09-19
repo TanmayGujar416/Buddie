@@ -33,8 +33,9 @@ import com.tanmay.buddie.data.local.entity.ExamEntity
 import com.tanmay.buddie.data.local.entity.SubmissionEntity
 import com.tanmay.buddie.presentation.components.ExamListSkeleton
 import com.tanmay.buddie.presentation.components.SubmissionListSkeleton
-import com.tanmay.buddie.presentation.components.mascot.BuddieMascot
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
+import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import com.tanmay.buddie.presentation.screens.exams.ExamWithSubject
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel
 import com.tanmay.buddie.presentation.screens.home.HomeViewModel
@@ -55,44 +56,41 @@ fun OverlayEmptyState(
     title: String,
     message: String,
     mood: MascotMood,
-    onOpenApp: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE,
+    animateIdle: Boolean = true
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        BuddieMascot(
+        SelectedCompanionMascot(
+            companionType = companionType,
             mood = mood,
-            size = 56.dp,
-            animateIdle = true
+            size = 72.dp,
+            animateIdle = animateIdle
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(14.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = message,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary,
             textAlign = TextAlign.Center,
-            fontSize = 12.sp
+            fontSize = 13.sp,
+            lineHeight = 18.sp
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        TextButton(
-            onClick = onOpenApp,
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-        ) {
-            Text("Open App", color = AccentBlueLight, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        }
     }
 }
 
@@ -290,7 +288,9 @@ fun OverlayExamCard(
 fun SubmissionsSection(
     viewModel: HomeViewModel,
     onOpenApp: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE,
+    animateIdle: Boolean = true
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -305,9 +305,10 @@ fun SubmissionsSection(
             uiState.submissions.isEmpty() -> {
                 OverlayEmptyState(
                     title = "All Caught Up!",
-                    message = "No upcoming assignments or deadlines.",
+                    message = "No pending assignments. Enjoy your free time!",
                     mood = uiState.mascotMood,
-                    onOpenApp = onOpenApp
+                    companionType = companionType,
+                    animateIdle = animateIdle
                 )
             }
             else -> {
@@ -358,7 +359,9 @@ fun SubmissionsSection(
 fun TimetableSection(
     viewModel: TimetableViewModel,
     onOpenApp: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE,
+    animateIdle: Boolean = true
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedDay by remember { mutableStateOf(LocalDate.now().dayOfWeek) }
@@ -421,31 +424,13 @@ fun TimetableSection(
                 CircularProgressIndicator(color = AccentBlueLight, modifier = Modifier.size(28.dp))
             }
         } else if (daySlots.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No Classes",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Free day on ${selectedDay.getDisplayName(TextStyle.FULL, Locale.getDefault())}!",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    TextButton(onClick = onOpenApp) {
-                        Text("View Full Timetable", color = AccentBlueLight, fontSize = 12.sp)
-                    }
-                }
-            }
+            OverlayEmptyState(
+                title = "No Classes Today!",
+                message = "Free day on ${selectedDay.getDisplayName(TextStyle.FULL, Locale.getDefault())}! Enjoy your break.",
+                mood = MascotMood.CALM,
+                companionType = companionType,
+                animateIdle = animateIdle
+            )
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
@@ -524,7 +509,9 @@ fun TimetableSection(
 fun ExamsSection(
     viewModel: ExamsViewModel,
     onOpenApp: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE,
+    animateIdle: Boolean = true
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -538,10 +525,11 @@ fun ExamsSection(
             }
             uiState.exams.isEmpty() -> {
                 OverlayEmptyState(
-                    title = "No Upcoming Exams",
+                    title = "No Upcoming Exams!",
                     message = "No exams scheduled. Relax and enjoy your free time!",
                     mood = uiState.mascotMood,
-                    onOpenApp = onOpenApp
+                    companionType = companionType,
+                    animateIdle = animateIdle
                 )
             }
             else -> {

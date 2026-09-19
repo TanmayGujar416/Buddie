@@ -18,12 +18,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tanmay.buddie.presentation.components.mascot.BuddieMascot
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
+import com.tanmay.buddie.presentation.components.mascot.MascotMoodHelper
+import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel
 import com.tanmay.buddie.presentation.screens.home.HomeViewModel
 import com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel
@@ -38,10 +42,20 @@ fun CompanionHeaderShell(
     timetableViewModel: TimetableViewModel,
     examsViewModel: ExamsViewModel,
     onCollapse: () -> Unit,
-    onOpenApp: () -> Unit,
-    modifier: Modifier = Modifier
+    onOpenApp: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE,
+    animateIdle: Boolean = true
 ) {
     var selectedSection by remember { mutableStateOf(CardSection.SUBMISSIONS) }
+
+    val activeRoute = remember(selectedSection) {
+        when (selectedSection) {
+            CardSection.SUBMISSIONS -> "home"
+            CardSection.TIMETABLE -> "timetable"
+            CardSection.EXAMS -> "exams"
+        }
+    }
 
     val homeUiState by homeViewModel.uiState.collectAsState()
     val examsUiState by examsViewModel.uiState.collectAsState()
@@ -58,73 +72,116 @@ fun CompanionHeaderShell(
         }
     }
 
-    Box(
+    // Modern Unified Floating Card Container (Matches Mockup 1:1)
+    Card(
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF141417)),
+        border = BorderStroke(1.dp, Color(0xFF24242B)),
         modifier = modifier
             .fillMaxWidth()
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                // Prevent tap inside from collapsing
+            .heightIn(min = 280.dp, max = 520.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                // Prevent tap inside card from collapsing
             }
     ) {
-        // Unified Card Container with perched top offset
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
-            border = BorderStroke(1.dp, BorderOutline),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 18.dp)
-                .heightIn(min = 180.dp, max = 500.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Companion Header Bar inside Card bounds
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Top Header Bar (Inside Card bounds)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Left: Avatar + Title + Status Dot & Text (Clickable to open app)
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                        .background(CharcoalSurfaceElevated)
-                        .padding(start = 68.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onOpenApp(activeRoute) }
+                        .padding(vertical = 2.dp, horizontal = 4.dp)
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF1E1E24))
+                            .border(1.dp, Color(0xFF2B2B34), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        SelectedCompanionMascot(
+                            companionType = companionType,
+                            mood = mood,
+                            size = 32.dp,
+                            animateIdle = animateIdle
+                        )
+                    }
+
                     Column {
                         Text(
                             text = "Buddie Companion",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                            color = TextPrimary,
+                            fontSize = 15.sp,
+                            lineHeight = 18.sp
                         )
-                        Text(
-                            text = mood.name.lowercase().replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = when (mood) {
-                                MascotMood.CALM -> AccentBlueLight
-                                MascotMood.AWARE -> StatusWarning
-                                MascotMood.URGENT -> StatusError
-                                MascotMood.OVERDUE -> StatusError
-                            },
-                            fontSize = 11.sp
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onCollapse,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Collapse",
-                            tint = TextSecondary,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            // 4 Distinct at-a-glance status dot colors
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(MascotMoodHelper.getMoodDotColor(mood))
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = mood.name.lowercase().replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextSecondary,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
 
-                // Tab bar with urgency badges
-                Row(
+                // Right: Circular Close Button
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF24242A))
+                        .clickable(onClick = onCollapse),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Collapse",
+                        tint = Color(0xFF9CA3AF),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            // Segmented Pill Tab Bar ("Assignments", "Timetable", "Exams")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF0D0D10))
+                    .padding(3.5.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     CardSection.entries.forEach { section ->
                         val isSelected = section == selectedSection
@@ -137,122 +194,119 @@ fun CompanionHeaderShell(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) AccentBlue else CharcoalSurfaceElevated)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) Color(0xFF282830) else Color.Transparent)
                                 .clickable { selectedSection = section }
-                                .padding(vertical = 8.dp, horizontal = 4.dp),
+                                .padding(vertical = 7.dp, horizontal = 2.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Icon(
-                                    imageVector = section.icon,
-                                    contentDescription = section.title,
-                                    tint = if (isSelected) TextPrimary else TextSecondary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = section.title,
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) TextPrimary else TextSecondary,
-                                    fontSize = 11.sp,
+                                    color = if (isSelected) TextPrimary else Color(0xFF71717A),
+                                    fontSize = 12.5.sp,
                                     maxLines = 1,
                                     softWrap = false,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center
                                 )
                                 if (showBadge) {
-                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Box(
                                         modifier = Modifier
-                                            .size(6.dp)
+                                            .size(5.dp)
                                             .clip(CircleShape)
-                                            .background(StatusError)
+                                            .background(Color(0xFFEF4444))
                                     )
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                Divider(color = DividerFaint, thickness = 0.5.dp)
-
-                // Content Section adapting to height
-                Box(modifier = Modifier.weight(1f, fill = false)) {
-                    Crossfade(
-                        targetState = selectedSection,
-                        animationSpec = tween(150),
-                        label = "companion_section_crossfade"
-                    ) { section ->
-                        when (section) {
-                            CardSection.SUBMISSIONS -> SubmissionsSection(
-                                viewModel = homeViewModel,
-                                onOpenApp = onOpenApp
-                            )
-                            CardSection.TIMETABLE -> TimetableSection(
-                                viewModel = timetableViewModel,
-                                onOpenApp = onOpenApp
-                            )
-                            CardSection.EXAMS -> ExamsSection(
-                                viewModel = examsViewModel,
-                                onOpenApp = onOpenApp
-                            )
-                        }
-                    }
-                }
-
-                Divider(color = DividerFaint, thickness = 0.5.dp)
-
-                // Footer with Open App button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Tap outside to collapse",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextMuted,
-                        fontSize = 11.sp
-                    )
-
-                    TextButton(
-                        onClick = onOpenApp,
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text("Open Buddie", color = AccentBlueLight, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                            Icon(Icons.Default.ArrowForward, contentDescription = null, tint = AccentBlueLight, modifier = Modifier.size(13.dp))
-                        }
+            // Content Area adapting to height
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+            ) {
+                Crossfade(
+                    targetState = selectedSection,
+                    animationSpec = tween(160),
+                    label = "companion_section_crossfade"
+                ) { section ->
+                    when (section) {
+                        CardSection.SUBMISSIONS -> SubmissionsSection(
+                            viewModel = homeViewModel,
+                            onOpenApp = { onOpenApp("home") },
+                            companionType = companionType,
+                            animateIdle = animateIdle
+                        )
+                        CardSection.TIMETABLE -> TimetableSection(
+                            viewModel = timetableViewModel,
+                            onOpenApp = { onOpenApp("timetable") },
+                            companionType = companionType,
+                            animateIdle = animateIdle
+                        )
+                        CardSection.EXAMS -> ExamsSection(
+                            viewModel = examsViewModel,
+                            onOpenApp = { onOpenApp("exams") },
+                            companionType = companionType,
+                            animateIdle = animateIdle
+                        )
                     }
                 }
             }
-        }
 
-        // Mascot Avatar perched on the card's top edge
-        Box(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(CharcoalSurfaceElevated)
-                .border(2.dp, BorderOutline, CircleShape)
-                .clickable { onCollapse() },
-            contentAlignment = Alignment.Center
-        ) {
-            BuddieMascot(
-                mood = mood,
-                size = 36.dp,
-                animateIdle = true
+            Divider(
+                color = Color(0xFF222228),
+                thickness = 0.5.dp,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
             )
+
+            // Footer with "Tap outside to collapse" and "Open Buddie →"
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 18.dp, end = 18.dp, top = 8.dp, bottom = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Tap outside to collapse",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF6B7280),
+                    fontSize = 11.5.sp
+                )
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable(onClick = { onOpenApp(activeRoute) })
+                        .padding(vertical = 2.dp, horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Open Buddie",
+                        color = Color(0xFF3B82F6),
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = null,
+                        tint = Color(0xFF3B82F6),
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+            }
         }
     }
 }

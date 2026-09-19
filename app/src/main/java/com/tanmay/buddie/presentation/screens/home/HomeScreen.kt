@@ -101,7 +101,8 @@ fun HomeScreen(
 
                 // Persistent Mascot Mood Indicator
                 MascotMoodIndicator(
-                    mood = uiState.mascotMood
+                    mood = uiState.mascotMood,
+                    companionType = uiState.companionType
                 )
             }
 
@@ -114,6 +115,7 @@ fun HomeScreen(
                         title = "All Caught Up!",
                         message = "No upcoming assignments or deadlines. Relax and enjoy your free time!",
                         mood = uiState.mascotMood,
+                        companionType = uiState.companionType,
                         actionLabel = "Add Assignment",
                         onActionClick = onAddSubmissionClick
                     )

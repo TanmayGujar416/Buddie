@@ -1,5 +1,6 @@
 package com.tanmay.buddie
 
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import com.tanmay.buddie.presentation.screens.settings.SettingsUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -12,8 +13,10 @@ class SettingsUiStateTest {
     fun defaultSettingsUiState_hasFloatingBubbleDisabled() {
         val state = SettingsUiState()
         assertFalse(state.floatingBubbleEnabled)
-        assertEquals("SPEECH_BUBBLE", state.cardStyle)
+        assertEquals("COMPANION_HEADER", state.cardStyle)
+        assertEquals(CompanionType.BUDDIE, state.companionType)
         assertEquals(24, state.notificationHours)
+        assertFalse(state.batterySaverEnabled)
     }
 
     @Test
@@ -22,12 +25,14 @@ class SettingsUiStateTest {
             cardStyle = "COMPANION_HEADER",
             notificationHours = 48,
             floatingBubbleEnabled = true,
-            batteryOptimizationPromptDismissed = false
+            batteryOptimizationPromptDismissed = false,
+            batterySaverEnabled = true
         )
         assertTrue(state.floatingBubbleEnabled)
         assertEquals("COMPANION_HEADER", state.cardStyle)
         assertEquals(48, state.notificationHours)
         assertFalse(state.batteryOptimizationPromptDismissed)
+        assertTrue(state.batterySaverEnabled)
     }
 
     @Test
@@ -38,5 +43,6 @@ class SettingsUiStateTest {
         )
         assertTrue(state.floatingBubbleEnabled)
         assertTrue(state.batteryOptimizationPromptDismissed)
+        assertFalse(state.batterySaverEnabled)
     }
 }

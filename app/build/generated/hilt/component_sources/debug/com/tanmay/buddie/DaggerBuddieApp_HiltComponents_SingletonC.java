@@ -423,6 +423,8 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     private MainActivity injectMainActivity2(MainActivity instance) {
       MainActivity_MembersInjector.injectUserPreferences(instance, singletonCImpl.userPreferencesProvider.get());
+      MainActivity_MembersInjector.injectSubjectRepository(instance, singletonCImpl.provideSubjectRepositoryProvider.get());
+      MainActivity_MembersInjector.injectTimetableRepository(instance, singletonCImpl.provideTimetableRepositoryProvider.get());
       return instance;
     }
   }
@@ -505,10 +507,10 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
           return (T) new AddEditSubmissionViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), viewModelCImpl.savedStateHandle);
 
           case 2: // com.tanmay.buddie.presentation.screens.exams.ExamsViewModel 
-          return (T) new ExamsViewModel(singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get());
+          return (T) new ExamsViewModel(singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get());
 
           case 3: // com.tanmay.buddie.presentation.screens.home.HomeViewModel 
-          return (T) new HomeViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get());
+          return (T) new HomeViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get());
 
           case 4: // com.tanmay.buddie.presentation.screens.settings.SettingsViewModel 
           return (T) new SettingsViewModel(singletonCImpl.userPreferencesProvider.get());
@@ -617,15 +619,15 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     private Provider<AppDatabase> provideAppDatabaseProvider;
 
-    private Provider<ExamRepository> provideExamRepositoryProvider;
-
     private Provider<SubjectRepository> provideSubjectRepositoryProvider;
+
+    private Provider<TimetableRepository> provideTimetableRepositoryProvider;
+
+    private Provider<ExamRepository> provideExamRepositoryProvider;
 
     private Provider<SubmissionRepository> provideSubmissionRepositoryProvider;
 
     private Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider;
-
-    private Provider<TimetableRepository> provideTimetableRepositoryProvider;
 
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
@@ -637,11 +639,11 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
       this.userPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<UserPreferences>(singletonCImpl, 0));
       this.provideAppDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 2));
-      this.provideExamRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<ExamRepository>(singletonCImpl, 1));
-      this.provideSubjectRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubjectRepository>(singletonCImpl, 3));
-      this.provideSubmissionRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubmissionRepository>(singletonCImpl, 4));
-      this.getMascotMoodUseCaseProvider = DoubleCheck.provider(new SwitchingProvider<GetMascotMoodUseCase>(singletonCImpl, 5));
-      this.provideTimetableRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<TimetableRepository>(singletonCImpl, 6));
+      this.provideSubjectRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubjectRepository>(singletonCImpl, 1));
+      this.provideTimetableRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<TimetableRepository>(singletonCImpl, 3));
+      this.provideExamRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<ExamRepository>(singletonCImpl, 4));
+      this.provideSubmissionRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubmissionRepository>(singletonCImpl, 5));
+      this.getMascotMoodUseCaseProvider = DoubleCheck.provider(new SwitchingProvider<GetMascotMoodUseCase>(singletonCImpl, 6));
     }
 
     @Override
@@ -685,23 +687,23 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
           case 0: // com.tanmay.buddie.data.datastore.UserPreferences 
           return (T) new UserPreferences(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 1: // com.tanmay.buddie.domain.repository.ExamRepository 
-          return (T) AppModule_ProvideExamRepositoryFactory.provideExamRepository(singletonCImpl.provideAppDatabaseProvider.get());
+          case 1: // com.tanmay.buddie.domain.repository.SubjectRepository 
+          return (T) AppModule_ProvideSubjectRepositoryFactory.provideSubjectRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
           case 2: // com.tanmay.buddie.data.local.AppDatabase 
           return (T) AppModule_ProvideAppDatabaseFactory.provideAppDatabase(ApplicationContextModule_ProvideApplicationFactory.provideApplication(singletonCImpl.applicationContextModule));
 
-          case 3: // com.tanmay.buddie.domain.repository.SubjectRepository 
-          return (T) AppModule_ProvideSubjectRepositoryFactory.provideSubjectRepository(singletonCImpl.provideAppDatabaseProvider.get());
+          case 3: // com.tanmay.buddie.domain.repository.TimetableRepository 
+          return (T) AppModule_ProvideTimetableRepositoryFactory.provideTimetableRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
-          case 4: // com.tanmay.buddie.domain.repository.SubmissionRepository 
+          case 4: // com.tanmay.buddie.domain.repository.ExamRepository 
+          return (T) AppModule_ProvideExamRepositoryFactory.provideExamRepository(singletonCImpl.provideAppDatabaseProvider.get());
+
+          case 5: // com.tanmay.buddie.domain.repository.SubmissionRepository 
           return (T) AppModule_ProvideSubmissionRepositoryFactory.provideSubmissionRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
-          case 5: // com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase 
+          case 6: // com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase 
           return (T) new GetMascotMoodUseCase(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get());
-
-          case 6: // com.tanmay.buddie.domain.repository.TimetableRepository 
-          return (T) AppModule_ProvideTimetableRepositoryFactory.provideTimetableRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
           default: throw new AssertionError(id);
         }

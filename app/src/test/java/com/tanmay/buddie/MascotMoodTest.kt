@@ -65,4 +65,15 @@ class MascotMoodTest {
         val mood = MascotMoodHelper.calculateMood(deadlines, now = baseNow)
         assertEquals(MascotMood.OVERDUE, mood)
     }
+
+    @Test
+    fun testDistinctMoodColors() {
+        val calmColor = MascotMoodHelper.getMoodDotColor(MascotMood.CALM)
+        val awareColor = MascotMoodHelper.getMoodDotColor(MascotMood.AWARE)
+        val urgentColor = MascotMoodHelper.getMoodDotColor(MascotMood.URGENT)
+        val overdueColor = MascotMoodHelper.getMoodDotColor(MascotMood.OVERDUE)
+
+        val colors = listOf(calmColor, awareColor, urgentColor, overdueColor)
+        assertEquals("All 4 mood colors must be distinct", 4, colors.distinct().size)
+    }
 }

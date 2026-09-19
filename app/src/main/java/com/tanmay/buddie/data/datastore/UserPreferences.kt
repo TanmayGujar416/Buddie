@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,6 +29,7 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
 
     companion object {
         val CARD_STYLE = stringPreferencesKey("card_style")
+        val COMPANION_TYPE = stringPreferencesKey("companion_type")
         val BUBBLE_EDGE = stringPreferencesKey("bubble_edge")
         val BUBBLE_POSITION_Y = intPreferencesKey("bubble_position_y")
         val INCLUDE_SATURDAY = booleanPreferencesKey("include_saturday")
@@ -35,12 +37,31 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         val NOTIFICATION_HOURS_BEFORE = intPreferencesKey("notification_hours_before")
         val FLOATING_BUBBLE_ENABLED = booleanPreferencesKey("floating_bubble_enabled")
         val BATTERY_OPTIMIZATION_PROMPT_DISMISSED = booleanPreferencesKey("battery_optimization_prompt_dismissed")
+        val BATTERY_SAVER_ENABLED = booleanPreferencesKey("battery_saver_enabled")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
-    val cardStyleFlow: Flow<String> = dataStore.data.map { it[CARD_STYLE] ?: "SPEECH_BUBBLE" }
+    val cardStyleFlow: Flow<String> = dataStore.data.map { it[CARD_STYLE] ?: "COMPANION_HEADER" }
+    val companionTypeFlow: Flow<CompanionType> = dataStore.data.map { preferences ->
+        val typeStr = preferences[COMPANION_TYPE]
+        try {
+            if (typeStr != null) {
+                when {
+                    typeStr.equals("CAT", ignoreCase = true) -> CompanionType.MOMO
+                    typeStr.equals("CLOUD", ignoreCase = true) -> CompanionType.WISP
+                    typeStr.equals("GHOST", ignoreCase = true) -> CompanionType.WISP
+                    else -> CompanionType.valueOf(typeStr)
+                }
+            } else CompanionType.BUDDIE
+        } catch (_: Exception) {
+            CompanionType.BUDDIE
+        }
+    }
     val notificationHoursFlow: Flow<Int> = dataStore.data.map { it[NOTIFICATION_HOURS_BEFORE] ?: 24 }
     val floatingBubbleEnabledFlow: Flow<Boolean> = dataStore.data.map { it[FLOATING_BUBBLE_ENABLED] ?: false }
     val batteryOptimizationPromptDismissedFlow: Flow<Boolean> = dataStore.data.map { it[BATTERY_OPTIMIZATION_PROMPT_DISMISSED] ?: false }
+    val batterySaverEnabledFlow: Flow<Boolean> = dataStore.data.map { it[BATTERY_SAVER_ENABLED] ?: false }
+    val onboardingCompletedFlow: Flow<Boolean> = dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
 
     val bubbleEdgeFlow: Flow<BubbleEdge> = dataStore.data.map { preferences ->
         val edgeStr = preferences[BUBBLE_EDGE]
@@ -63,6 +84,10 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         dataStore.edit { it[CARD_STYLE] = style }
     }
 
+    suspend fun setCompanionType(type: CompanionType) {
+        dataStore.edit { it[COMPANION_TYPE] = type.name }
+    }
+
     suspend fun setNotificationHoursBefore(hours: Int) {
         dataStore.edit { it[NOTIFICATION_HOURS_BEFORE] = hours }
     }
@@ -73,6 +98,14 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
 
     suspend fun setBatteryOptimizationPromptDismissed(dismissed: Boolean) {
         dataStore.edit { it[BATTERY_OPTIMIZATION_PROMPT_DISMISSED] = dismissed }
+    }
+
+    suspend fun setBatterySaverEnabled(enabled: Boolean) {
+        dataStore.edit { it[BATTERY_SAVER_ENABLED] = enabled }
+    }
+
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        dataStore.edit { it[ONBOARDING_COMPLETED] = completed }
     }
 
     suspend fun setIncludeSaturday(include: Boolean) {

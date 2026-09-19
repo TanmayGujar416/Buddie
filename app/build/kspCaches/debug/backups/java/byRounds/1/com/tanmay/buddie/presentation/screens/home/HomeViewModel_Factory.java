@@ -1,5 +1,6 @@
 package com.tanmay.buddie.presentation.screens.home;
 
+import com.tanmay.buddie.data.datastore.UserPreferences;
 import com.tanmay.buddie.domain.repository.ExamRepository;
 import com.tanmay.buddie.domain.repository.SubjectRepository;
 import com.tanmay.buddie.domain.repository.SubmissionRepository;
@@ -33,32 +34,37 @@ public final class HomeViewModel_Factory implements Factory<HomeViewModel> {
 
   private final Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider;
 
+  private final Provider<UserPreferences> userPreferencesProvider;
+
   public HomeViewModel_Factory(Provider<SubmissionRepository> submissionRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
       Provider<ExamRepository> examRepositoryProvider,
-      Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider) {
+      Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider,
+      Provider<UserPreferences> userPreferencesProvider) {
     this.submissionRepositoryProvider = submissionRepositoryProvider;
     this.subjectRepositoryProvider = subjectRepositoryProvider;
     this.examRepositoryProvider = examRepositoryProvider;
     this.getMascotMoodUseCaseProvider = getMascotMoodUseCaseProvider;
+    this.userPreferencesProvider = userPreferencesProvider;
   }
 
   @Override
   public HomeViewModel get() {
-    return newInstance(submissionRepositoryProvider.get(), subjectRepositoryProvider.get(), examRepositoryProvider.get(), getMascotMoodUseCaseProvider.get());
+    return newInstance(submissionRepositoryProvider.get(), subjectRepositoryProvider.get(), examRepositoryProvider.get(), getMascotMoodUseCaseProvider.get(), userPreferencesProvider.get());
   }
 
   public static HomeViewModel_Factory create(
       Provider<SubmissionRepository> submissionRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
       Provider<ExamRepository> examRepositoryProvider,
-      Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider) {
-    return new HomeViewModel_Factory(submissionRepositoryProvider, subjectRepositoryProvider, examRepositoryProvider, getMascotMoodUseCaseProvider);
+      Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider,
+      Provider<UserPreferences> userPreferencesProvider) {
+    return new HomeViewModel_Factory(submissionRepositoryProvider, subjectRepositoryProvider, examRepositoryProvider, getMascotMoodUseCaseProvider, userPreferencesProvider);
   }
 
   public static HomeViewModel newInstance(SubmissionRepository submissionRepository,
       SubjectRepository subjectRepository, ExamRepository examRepository,
-      GetMascotMoodUseCase getMascotMoodUseCase) {
-    return new HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase);
+      GetMascotMoodUseCase getMascotMoodUseCase, UserPreferences userPreferences) {
+    return new HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase, userPreferences);
   }
 }

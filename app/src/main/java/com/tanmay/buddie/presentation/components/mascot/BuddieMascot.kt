@@ -52,35 +52,27 @@ fun BuddieMascot(
     size: Dp = 110.dp,
     animateIdle: Boolean = true
 ) {
-    // Idle breathing & floating micro-animation
-    val infiniteTransition = rememberInfiniteTransition(label = "mascot_idle")
-    val floatOffset by if (animateIdle) {
-        infiniteTransition.animateFloat(
+    // Throttled idle breathing & floating micro-animation (~20 updates/sec)
+    val elapsedMs by rememberThrottledAnimationClock(enabled = animateIdle)
+    val floatOffset = if (animateIdle) {
+        calculateThrottledValue(
+            elapsedMs = elapsedMs,
             initialValue = -3.5f,
             targetValue = 3.5f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1800, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "float_offset"
+            durationMs = 1800,
+            easing = FastOutSlowInEasing
         )
-    } else {
-        remember { mutableFloatStateOf(0f) }
-    }
+    } else 0f
 
-    val breathScaleY by if (animateIdle) {
-        infiniteTransition.animateFloat(
+    val breathScaleY = if (animateIdle) {
+        calculateThrottledValue(
+            elapsedMs = elapsedMs,
             initialValue = 0.985f,
             targetValue = 1.015f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1800, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "breath_scale"
+            durationMs = 1800,
+            easing = FastOutSlowInEasing
         )
-    } else {
-        remember { mutableFloatStateOf(1f) }
-    }
+    } else 1f
 
     Box(
         modifier = modifier

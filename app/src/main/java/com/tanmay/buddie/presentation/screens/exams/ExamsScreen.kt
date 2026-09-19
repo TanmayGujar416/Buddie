@@ -102,7 +102,8 @@ fun ExamsScreen(
 
                 // Persistent Mascot Mood Indicator
                 MascotMoodIndicator(
-                    mood = uiState.mascotMood
+                    mood = uiState.mascotMood,
+                    companionType = uiState.companionType
                 )
             }
 
@@ -115,6 +116,7 @@ fun ExamsScreen(
                         title = "All Clear!",
                         message = "No upcoming exams on your schedule. You're completely in the clear!",
                         mood = uiState.mascotMood,
+                        companionType = uiState.companionType,
                         actionLabel = "Add Exam",
                         onActionClick = onAddExamClick
                     )

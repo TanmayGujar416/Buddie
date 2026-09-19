@@ -17,12 +17,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
+import com.tanmay.buddie.data.datastore.UserPreferences
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import javax.inject.Inject
 
 data class HomeUiState(
     val submissions: List<SubmissionWithSubject> = emptyList(),
     val isLoading: Boolean = true,
-    val mascotMood: MascotMood = MascotMood.CALM
+    val mascotMood: MascotMood = MascotMood.CALM,
+    val companionType: CompanionType = CompanionType.BUDDIE
 )
 
 data class SubmissionWithSubject(
@@ -35,7 +38,8 @@ class HomeViewModel @Inject constructor(
     private val submissionRepository: SubmissionRepository,
     private val subjectRepository: SubjectRepository,
     private val examRepository: ExamRepository,
-    private val getMascotMoodUseCase: GetMascotMoodUseCase
+    private val getMascotMoodUseCase: GetMascotMoodUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     // Cache the previous status before marking done, ensuring undo preserves
@@ -45,8 +49,9 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         submissionRepository.getAllSubmissions(),
         subjectRepository.getAllSubjects(),
-        getMascotMoodUseCase()
-    ) { submissions, subjects, mood ->
+        getMascotMoodUseCase(),
+        userPreferences.companionTypeFlow
+    ) { submissions, subjects, mood, companionType ->
         val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE }
         val mapped = activeSubmissions
             .map { sub ->
@@ -60,7 +65,8 @@ class HomeViewModel @Inject constructor(
         HomeUiState(
             submissions = mapped,
             isLoading = false,
-            mascotMood = mood
+            mascotMood = mood,
+            companionType = companionType
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
     

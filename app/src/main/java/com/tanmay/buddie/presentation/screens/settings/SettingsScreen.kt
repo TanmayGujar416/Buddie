@@ -10,14 +10,25 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
+import com.tanmay.buddie.presentation.components.mascot.MascotMood
+import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.tanmay.buddie.presentation.theme.*
@@ -333,6 +350,103 @@ fun SettingsScreen(
                             }
                         }
                     }
+
+                    // Battery Saver Card (opt-in static pose for bubble)
+                    Card(
+                        shape = CardShape,
+                        colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                        border = BorderStroke(1.dp, BorderOutline),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 12.dp)
+                            ) {
+                                Text(
+                                    text = "Battery Saver",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = "Static pose in collapsed bubble to save power; animates when opened",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+
+                            Switch(
+                                checked = uiState.batterySaverEnabled,
+                                onCheckedChange = { viewModel.setBatterySaverEnabled(it) },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = TextPrimary,
+                                    checkedTrackColor = AccentBlue,
+                                    checkedBorderColor = AccentBlue,
+                                    uncheckedThumbColor = TextSecondary,
+                                    uncheckedTrackColor = CharcoalSurfaceElevated,
+                                    uncheckedBorderColor = BorderOutline
+                                )
+                            )
+                        }
+                    }
+
+                    // Battery Troubleshooting Collapsible Section
+                    BatteryTroubleshootingCard()
+                }
+
+                Divider(color = DividerFaint, thickness = 0.5.dp)
+
+                // Companion Character section
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Companion Character",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                    Text(
+                        text = "Choose your companion for reminders & floating overlay cards",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        CompanionPreviewCard(
+                            companionType = CompanionType.BUDDIE,
+                            title = "Buddie",
+                            subtitle = "Mochi",
+                            isSelected = uiState.companionType == CompanionType.BUDDIE,
+                            onClick = { viewModel.updateCompanionType(CompanionType.BUDDIE) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        CompanionPreviewCard(
+                            companionType = CompanionType.MOMO,
+                            title = "Momo",
+                            subtitle = "Cat",
+                            isSelected = uiState.companionType == CompanionType.MOMO,
+                            onClick = { viewModel.updateCompanionType(CompanionType.MOMO) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        CompanionPreviewCard(
+                            companionType = CompanionType.WISP,
+                            title = "Wisp",
+                            subtitle = "Ghost",
+                            isSelected = uiState.companionType == CompanionType.WISP,
+                            onClick = { viewModel.updateCompanionType(CompanionType.WISP) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
                 Divider(color = DividerFaint, thickness = 0.5.dp)
@@ -488,7 +602,7 @@ fun StylePreviewCard(
 ) {
     Card(
         modifier = modifier
-            .height(110.dp)
+            .height(125.dp)
             .clip(CardShape)
             .clickable(onClick = onClick),
         shape = CardShape,
@@ -503,21 +617,436 @@ fun StylePreviewCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(14.dp),
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Miniature visual preview thumbnail
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isSelected) Color(0xFF141417) else Color(0xFF19191E))
+                    .border(
+                        0.5.dp,
+                        if (isSelected) AccentBlueLight.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.06f),
+                        RoundedCornerShape(8.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (title.contains("Companion", ignoreCase = true)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF2B2B34))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(36.dp)
+                                    .height(5.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(TextSecondary)
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF24242A))
+                        )
+                    }
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(13.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF2B2B34))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(42.dp)
+                                .height(5.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(AccentBlue)
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSelected) AccentBlueLight else TextPrimary,
+                    fontSize = 13.sp
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    fontSize = 11.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CompanionPreviewCard(
+    companionType: CompanionType,
+    title: String,
+    subtitle: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .height(130.dp)
+            .clip(CardShape)
+            .clickable(onClick = onClick),
+        shape = CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) CharcoalSurfaceElevated else CharcoalSurface
+        ),
+        border = BorderStroke(
+            width = if (isSelected) 1.5.dp else 1.dp,
+            color = if (isSelected) AccentBlueLight else BorderOutline
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(if (isSelected) Color(0xFF1E1E24) else CharcoalSurface)
+                    .border(1.dp, if (isSelected) AccentBlueLight.copy(alpha = 0.6f) else BorderOutline, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                SelectedCompanionMascot(
+                    companionType = companionType,
+                    mood = MascotMood.CALM,
+                    size = 36.dp,
+                    animateIdle = isSelected
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = if (isSelected) AccentBlueLight else TextPrimary
+                color = if (isSelected) AccentBlueLight else TextPrimary,
+                fontSize = 13.sp,
+                maxLines = 1
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary
+                color = TextSecondary,
+                fontSize = 11.sp,
+                maxLines = 1
             )
         }
     }
 }
+
+@Composable
+fun BatteryTroubleshootingCard(
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    val detectedBrand = remember { BatteryGuideBrand.detect() }
+    var selectedBrand by rememberSaveable { mutableStateOf(detectedBrand) }
+
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 90f else 0f,
+        animationSpec = tween(200),
+        label = "troubleshoot_expand_rotation"
+    )
+
+    Card(
+        shape = CardShape,
+        colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+        border = BorderStroke(1.dp, BorderOutline),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header Row (Clickable to toggle expand)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(CharcoalSurfaceElevated)
+                            .border(1.dp, BorderOutline, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            tint = AccentBlueLight,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = "Battery Troubleshooting",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = if (isExpanded) "Tailored for ${selectedBrand.skinName}" else "Keep bubble running on ${detectedBrand.brandName.split(" /")[0]}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(CharcoalSurfaceElevated)
+                        .border(1.dp, BorderOutline, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = TextSecondary,
+                        modifier = Modifier
+                            .size(13.dp)
+                            .rotate(rotationAngle)
+                    )
+                }
+            }
+
+            // Expandable Content
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(tween(220)) + fadeIn(tween(220)),
+                exit = shrinkVertically(tween(180)) + fadeOut(tween(180))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Divider(color = DividerFaint, thickness = 0.5.dp)
+
+                    // Detected brand badge + OEM selector chips
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "DEVICE GUIDANCE",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = TextMuted,
+                                letterSpacing = 1.sp
+                            )
+                            if (selectedBrand == detectedBrand) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(AccentBlue.copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "Auto-detected",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = AccentBlueLight,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+
+                        // Scrollable brand selection chips
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(BatteryGuideBrand.entries.toTypedArray()) { brand ->
+                                val isSelected = brand == selectedBrand
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(if (isSelected) AccentBlue else CharcoalSurfaceElevated)
+                                        .border(
+                                            1.dp,
+                                            if (isSelected) AccentBlueLight else BorderOutline,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable { selectedBrand = brand }
+                                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                                ) {
+                                    Text(
+                                        text = if (brand == detectedBrand) "${brand.brandName.split(" /")[0]} ★" else brand.brandName.split(" /")[0],
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) TextPrimary else TextSecondary,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        fontSize = 11.5.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Numbered Steps
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(9.dp)
+                    ) {
+                        selectedBrand.steps.forEachIndexed { index, step ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.Top,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .background(CharcoalSurfaceElevated)
+                                        .border(1.dp, BorderOutline, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "${index + 1}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = AccentBlueLight,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.5.sp
+                                    )
+                                }
+
+                                Text(
+                                    text = step,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    fontSize = 12.sp,
+                                    lineHeight = 17.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+
+                    // Pro-tip if available
+                    selectedBrand.proTip?.let { tip ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(CharcoalSurfaceElevated)
+                                .border(1.dp, BorderOutline, RoundedCornerShape(8.dp))
+                                .padding(horizontal = 10.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "💡 $tip",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextMuted,
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp
+                            )
+                        }
+                    }
+
+                    // Quick Jump Action Button
+                    Button(
+                        onClick = {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                            }
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("SettingsScreen", "Failed to open application details settings", e)
+                                try {
+                                    context.startActivity(Intent(Settings.ACTION_SETTINGS))
+                                } catch (_: Exception) {}
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = CharcoalSurfaceElevated,
+                            contentColor = TextPrimary
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, BorderOutline),
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(vertical = 9.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "Open Buddie App Settings",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.5.sp,
+                                color = AccentBlueLight
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = null,
+                                tint = AccentBlueLight,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

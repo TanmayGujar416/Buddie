@@ -32,4 +32,18 @@ object MascotMoodHelper {
             else -> MascotMood.CALM
         }
     }
+
+    /**
+     * 4 distinct at-a-glance status dot colors for the mood states:
+     * - CALM: Emerald Green (clear/peaceful)
+     * - AWARE: Amber Yellow (upcoming soon)
+     * - URGENT: Vibrant Coral Orange (due within 24h, distinct from red)
+     * - OVERDUE: Deep Crimson Red (missed deadline)
+     */
+    fun getMoodDotColor(mood: MascotMood): androidx.compose.ui.graphics.Color = when (mood) {
+        MascotMood.CALM -> androidx.compose.ui.graphics.Color(0xFF22C55E)
+        MascotMood.AWARE -> androidx.compose.ui.graphics.Color(0xFFF59E0B)
+        MascotMood.URGENT -> androidx.compose.ui.graphics.Color(0xFFFF7A45)
+        MascotMood.OVERDUE -> androidx.compose.ui.graphics.Color(0xFFDC2626)
+    }
 }

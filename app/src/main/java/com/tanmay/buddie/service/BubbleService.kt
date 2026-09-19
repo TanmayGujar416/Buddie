@@ -8,12 +8,16 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -31,11 +35,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import com.tanmay.buddie.presentation.theme.BuddieTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +72,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.tanmay.buddie.MainActivity
 import com.tanmay.buddie.R
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
+import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import com.tanmay.buddie.data.datastore.BubbleEdge
 import com.tanmay.buddie.data.datastore.UserPreferences
 import com.tanmay.buddie.domain.repository.ExamRepository
@@ -71,7 +81,6 @@ import com.tanmay.buddie.domain.repository.SubjectRepository
 import com.tanmay.buddie.domain.repository.SubmissionRepository
 import com.tanmay.buddie.domain.repository.TimetableRepository
 import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase
-import com.tanmay.buddie.presentation.components.mascot.BuddieMascot
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
 import com.tanmay.buddie.presentation.components.mascot.card.MascotCardContainer
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel
@@ -129,11 +138,11 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return when {
                     modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-                        HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase) as T
+                        HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase, userPreferences) as T
                     modelClass.isAssignableFrom(TimetableViewModel::class.java) ->
                         TimetableViewModel(timetableRepository, subjectRepository) as T
                     modelClass.isAssignableFrom(ExamsViewModel::class.java) ->
-                        ExamsViewModel(examRepository, subjectRepository, submissionRepository, getMascotMoodUseCase) as T
+                        ExamsViewModel(examRepository, subjectRepository, submissionRepository, getMascotMoodUseCase, userPreferences) as T
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }
             }
@@ -148,10 +157,55 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
     private var snapAnimator: ValueAnimator? = null
     private var isAttaching = false
     private var isExpanded by mutableStateOf(false)
+    internal var isScreenOn by mutableStateOf(true)
+    private var isScreenReceiverRegistered = false
+
+    internal val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    Log.d("BubbleService", "Screen turned off - pausing mascot idle animations")
+                    isScreenOn = false
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    Log.d("BubbleService", "Screen turned on - resuming mascot idle animations")
+                    isScreenOn = true
+                }
+            }
+        }
+    }
+
+    private fun initScreenState() {
+        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+        isScreenOn = powerManager?.isInteractive ?: true
+    }
+
+    private fun registerScreenStateReceiver() {
+        if (!isScreenReceiverRegistered) {
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+            }
+            registerReceiver(screenStateReceiver, filter)
+            isScreenReceiverRegistered = true
+        }
+    }
+
+    private fun unregisterScreenStateReceiver() {
+        if (isScreenReceiverRegistered) {
+            try {
+                unregisterReceiver(screenStateReceiver)
+            } catch (e: Exception) {
+                Log.e("BubbleService", "Error unregistering screenStateReceiver", e)
+            }
+            isScreenReceiverRegistered = false
+        }
+    }
 
     companion object {
         const val CHANNEL_ID = "buddie_floating_bubble_channel"
         const val NOTIFICATION_ID = 1001
+        const val EXTRA_TARGET_TAB = "extra_target_tab"
 
         fun start(context: Context) {
             val intent = Intent(context, BubbleService::class.java)
@@ -175,6 +229,8 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
         createNotificationChannel()
         startInForeground()
+        initScreenState()
+        registerScreenStateReceiver()
         lifecycleRegistry.currentState = Lifecycle.State.STARTED
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         attachBubble()
@@ -187,6 +243,7 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
     }
 
     override fun onDestroy() {
+        unregisterScreenStateReceiver()
         snapAnimator?.cancel()
         snapAnimator = null
         serviceScope.cancel()
@@ -205,6 +262,30 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
     private fun getScreenDimensions(): Pair<Int, Int> {
         val displayMetrics = resources.displayMetrics
         return Pair(displayMetrics.widthPixels, displayMetrics.heightPixels)
+    }
+
+    private fun getStatusBarHeight(): Int {
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        val resHeight = if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
+        return resHeight.coerceAtLeast((36 * resources.displayMetrics.density).toInt())
+    }
+
+    private fun getNavigationBarHeight(): Int {
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        val resHeight = if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
+        return resHeight.coerceAtLeast((48 * resources.displayMetrics.density).toInt())
+    }
+
+    private fun getMinY(): Int {
+        val margin = (8 * resources.displayMetrics.density).toInt()
+        return getStatusBarHeight() + margin
+    }
+
+    private fun getMaxY(bubbleSizePx: Int): Int {
+        val (_, screenHeight) = getScreenDimensions()
+        val margin = (8 * resources.displayMetrics.density).toInt()
+        val bottomCutoff = getNavigationBarHeight() + margin
+        return (screenHeight - bubbleSizePx - bottomCutoff).coerceAtLeast(getMinY())
     }
 
     private fun attachBubble() {
@@ -247,8 +328,8 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             (screenWidth - bubbleSizePx - marginPx).coerceAtLeast(0)
         }
 
-        val minY = (24 * density).toInt()
-        val maxY = (screenHeight - bubbleSizePx - (48 * density).toInt()).coerceAtLeast(minY)
+        val minY = getMinY()
+        val maxY = getMaxY(bubbleSizePx)
         val initialY = (savedY ?: ((screenHeight - bubbleSizePx) / 2)).coerceIn(minY, maxY)
 
         val layoutParams = WindowManager.LayoutParams(
@@ -266,6 +347,7 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             gravity = Gravity.TOP or Gravity.START
             x = initialX
             y = initialY
+            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
         }
 
         val composeView = ComposeView(this).apply {
@@ -274,64 +356,72 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             setViewTreeViewModelStoreOwner(this@BubbleService)
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
             setContent {
-                val mood by getMascotMoodUseCase().collectAsState(initial = MascotMood.CALM)
-                val cardStyle by userPreferences.cardStyleFlow.collectAsState(initial = "SPEECH_BUBBLE")
+                BuddieTheme {
+                    val mood by getMascotMoodUseCase().collectAsState(initial = MascotMood.CALM)
+                    val cardStyle by userPreferences.cardStyleFlow.collectAsState(initial = "COMPANION_HEADER")
+                    val companionType by userPreferences.companionTypeFlow.collectAsState(initial = CompanionType.BUDDIE)
+                    val batterySaverEnabled by userPreferences.batterySaverEnabledFlow.collectAsState(initial = false)
 
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Expanded Card Overlay
-                    AnimatedVisibility(
-                        visible = isExpanded,
-                        enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.88f, animationSpec = tween(220)),
-                        exit = fadeOut(animationSpec = tween(180)) + scaleOut(targetScale = 0.88f, animationSpec = tween(180))
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.45f))
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    collapseBubble(layoutParams, bubbleSizePx)
-                                },
-                            contentAlignment = Alignment.Center
+                        // Expanded Card Overlay
+                        AnimatedVisibility(
+                            visible = isExpanded,
+                            enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.88f, animationSpec = tween(220)),
+                            exit = fadeOut(animationSpec = tween(180)) + scaleOut(targetScale = 0.88f, animationSpec = tween(180))
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .widthIn(max = 380.dp)
-                                    .fillMaxWidth(0.92f)
-                                    .padding(16.dp)
-                            ) {
-                                MascotCardContainer(
-                                    cardStyle = cardStyle,
-                                    mood = mood,
-                                    homeViewModel = homeViewModel,
-                                    timetableViewModel = timetableViewModel,
-                                    examsViewModel = examsViewModel,
-                                    onCollapse = { collapseBubble(layoutParams, bubbleSizePx) },
-                                    onOpenApp = {
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.45f))
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
                                         collapseBubble(layoutParams, bubbleSizePx)
-                                        openMainActivity()
-                                    }
-                                )
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .widthIn(max = 380.dp)
+                                        .fillMaxWidth(0.92f)
+                                        .windowInsetsPadding(WindowInsets.safeDrawing)
+                                        .padding(16.dp)
+                                ) {
+                                    MascotCardContainer(
+                                        cardStyle = cardStyle,
+                                        mood = mood,
+                                        homeViewModel = homeViewModel,
+                                        timetableViewModel = timetableViewModel,
+                                        examsViewModel = examsViewModel,
+                                        onCollapse = { collapseBubble(layoutParams, bubbleSizePx) },
+                                        onOpenApp = { targetRoute ->
+                                            collapseBubble(layoutParams, bubbleSizePx)
+                                            openMainActivity(targetRoute)
+                                        },
+                                        companionType = companionType,
+                                        animateIdle = isScreenOn
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    // Collapsed Mascot Bubble
-                    if (!isExpanded) {
-                        Box(
-                            modifier = Modifier.size(48.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            BuddieMascot(
-                                mood = mood,
-                                size = 48.dp,
-                                animateIdle = true
-                            )
+                        // Collapsed Mascot Bubble
+                        if (!isExpanded) {
+                            Box(
+                                modifier = Modifier.size(48.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                SelectedCompanionMascot(
+                                    companionType = companionType,
+                                    mood = mood,
+                                    size = 48.dp,
+                                    animateIdle = isScreenOn && !batterySaverEnabled
+                                )
+                            }
                         }
                     }
                 }
@@ -343,6 +433,8 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
         var initialParamX = 0
         var initialParamY = 0
         var isDragging = false
+        var lastTapUpTime = 0L
+        val doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout().toLong()
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
 
         composeView.setOnTouchListener { v, event ->
@@ -368,9 +460,9 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
                         isDragging = true
                     }
                     if (isDragging) {
-                        val (currWidth, currHeight) = getScreenDimensions()
-                        val currMinY = (24 * density).toInt()
-                        val currMaxY = (currHeight - bubbleSizePx - (48 * density).toInt()).coerceAtLeast(currMinY)
+                        val (currWidth, _) = getScreenDimensions()
+                        val currMinY = getMinY()
+                        val currMaxY = getMaxY(bubbleSizePx)
                         val currMaxX = (currWidth - bubbleSizePx).coerceAtLeast(0)
 
                         layoutParams.x = (initialParamX + dx).toInt().coerceIn(0, currMaxX)
@@ -388,7 +480,15 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
                         snapToEdge(layoutParams, bubbleSizePx, marginPx)
                     } else {
                         v.performClick()
-                        expandBubble(layoutParams)
+                        val now = SystemClock.uptimeMillis()
+                        if (now - lastTapUpTime < doubleTapTimeout) {
+                            // Double tap on collapsed bubble directly opens/resumes MainActivity
+                            openMainActivity()
+                            lastTapUpTime = 0L
+                        } else {
+                            lastTapUpTime = now
+                            expandBubble(layoutParams)
+                        }
                     }
                     true
                 }
@@ -422,7 +522,8 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
         currentLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
         currentLayoutParams.x = 0
         currentLayoutParams.y = 0
-        currentLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        currentLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+        currentLayoutParams.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         try {
             wm.updateViewLayout(view, currentLayoutParams)
         } catch (e: Exception) {
@@ -445,8 +546,8 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
                 val savedY = try { userPreferences.bubblePositionYFlow.first() } catch (_: Exception) { null }
                 val marginPx = (8 * resources.displayMetrics.density).toInt()
                 val bubbleX = if (savedEdge == BubbleEdge.LEFT) marginPx else (screenWidth - bubbleSizePx - marginPx).coerceAtLeast(0)
-                val minY = (24 * resources.displayMetrics.density).toInt()
-                val maxY = (screenHeight - bubbleSizePx - (48 * resources.displayMetrics.density).toInt()).coerceAtLeast(minY)
+                val minY = getMinY()
+                val maxY = getMaxY(bubbleSizePx)
                 val bubbleY = (savedY ?: ((screenHeight - bubbleSizePx) / 2)).coerceIn(minY, maxY)
 
                 currentLayoutParams.width = bubbleSizePx
@@ -454,6 +555,7 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
                 currentLayoutParams.x = bubbleX
                 currentLayoutParams.y = bubbleY
                 currentLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                currentLayoutParams.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
                 try {
                     wm.updateViewLayout(view, currentLayoutParams)
                 } catch (e: Exception) {
@@ -522,9 +624,12 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
         animator.start()
     }
 
-    private fun openMainActivity() {
+    private fun openMainActivity(targetTab: String? = null) {
         val appIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            if (targetTab != null) {
+                putExtra(EXTRA_TARGET_TAB, targetTab)
+            }
         }
         startActivity(appIntent)
     }
@@ -534,9 +639,17 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
         snapAnimator = null
         bubbleView?.let { view ->
             try {
-                windowManager?.removeView(view)
+                if (view.isAttachedToWindow) {
+                    windowManager?.removeViewImmediate(view)
+                } else {
+                    windowManager?.removeView(view)
+                }
             } catch (e: Exception) {
-                Log.e("BubbleService", "Failed to remove bubble overlay from WindowManager", e)
+                try {
+                    windowManager?.removeView(view)
+                } catch (e2: Exception) {
+                    Log.e("BubbleService", "Failed to remove bubble overlay from WindowManager", e2)
+                }
             }
             bubbleView = null
         }
@@ -562,7 +675,7 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             this,
             0,
             Intent(this, MainActivity::class.java).apply {
-                this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )

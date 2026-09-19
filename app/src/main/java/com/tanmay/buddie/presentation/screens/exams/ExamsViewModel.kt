@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.tanmay.buddie.data.datastore.UserPreferences
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import javax.inject.Inject
 
 data class ExamWithSubject(
@@ -26,7 +28,8 @@ data class ExamWithSubject(
 data class ExamsUiState(
     val exams: List<ExamWithSubject> = emptyList(),
     val isLoading: Boolean = true,
-    val mascotMood: MascotMood = MascotMood.CALM
+    val mascotMood: MascotMood = MascotMood.CALM,
+    val companionType: CompanionType = CompanionType.BUDDIE
 )
 
 @HiltViewModel
@@ -34,14 +37,16 @@ class ExamsViewModel @Inject constructor(
     private val examRepository: ExamRepository,
     private val subjectRepository: SubjectRepository,
     private val submissionRepository: SubmissionRepository,
-    private val getMascotMoodUseCase: GetMascotMoodUseCase
+    private val getMascotMoodUseCase: GetMascotMoodUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     val uiState: StateFlow<ExamsUiState> = combine(
         examRepository.getAllExams(),
         subjectRepository.getAllSubjects(),
-        getMascotMoodUseCase()
-    ) { exams, subjects, mood ->
+        getMascotMoodUseCase(),
+        userPreferences.companionTypeFlow
+    ) { exams, subjects, mood, companionType ->
         val mapped = exams
             .filter { it.datetime.isAfter(java.time.LocalDateTime.now().minusDays(1)) } // Filter out old exams
             .map { exam ->
@@ -55,7 +60,8 @@ class ExamsViewModel @Inject constructor(
         ExamsUiState(
             exams = mapped,
             isLoading = false,
-            mascotMood = mood
+            mascotMood = mood,
+            companionType = companionType
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ExamsUiState())
 

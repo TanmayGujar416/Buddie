@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.BubbleSnapTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-15T05:33:30" hostname="LAPTOP-0JF3IUAT" time="0.002">
+<testsuite name="com.tanmay.buddie.BubbleSnapTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-19T06:27:09" hostname="LAPTOP-0JF3IUAT" time="0.002">
   <properties/>
   <testcase name="snapToEdge_leftHalfOfScreen_selectsLeftEdge" classname="com.tanmay.buddie.BubbleSnapTest" time="0.0"/>
-  <testcase name="initialPosition_withNoSavedY_centersVertically" classname="com.tanmay.buddie.BubbleSnapTest" time="0.0"/>
-  <testcase name="snapToEdge_rightHalfOfScreen_selectsRightEdge" classname="com.tanmay.buddie.BubbleSnapTest" time="0.002"/>
+  <testcase name="initialPosition_withNoSavedY_centersVertically" classname="com.tanmay.buddie.BubbleSnapTest" time="0.001"/>
+  <testcase name="snapToEdge_rightHalfOfScreen_selectsRightEdge" classname="com.tanmay.buddie.BubbleSnapTest" time="0.001"/>
   <testcase name="verticalClamp_clampsWithinSafeBounds" classname="com.tanmay.buddie.BubbleSnapTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

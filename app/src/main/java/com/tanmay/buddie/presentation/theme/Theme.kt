@@ -40,12 +40,13 @@ fun BuddieTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            // True Edge-to-Edge System Bar Blending
-            window.statusBarColor = CharcoalBackground.toArgb()
-            window.navigationBarColor = CharcoalBackground.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
+            (view.context as? Activity)?.window?.let { window ->
+                // True Edge-to-Edge System Bar Blending
+                window.statusBarColor = CharcoalBackground.toArgb()
+                window.navigationBarColor = CharcoalBackground.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
+            }
         }
     }
 

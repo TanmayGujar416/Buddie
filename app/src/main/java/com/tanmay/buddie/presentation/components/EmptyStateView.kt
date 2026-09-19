@@ -8,8 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.tanmay.buddie.presentation.components.mascot.BuddieMascot
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
+import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import com.tanmay.buddie.presentation.theme.*
 
 @Composable
@@ -18,6 +19,7 @@ fun EmptyStateView(
     message: String,
     modifier: Modifier = Modifier,
     mood: MascotMood = MascotMood.CALM,
+    companionType: CompanionType = CompanionType.BUDDIE,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null
 ) {
@@ -31,10 +33,12 @@ fun EmptyStateView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Calm Mascot with gentle breathing micro-animation
-            BuddieMascot(
+            // Companion Mascot with gentle breathing micro-animation
+            SelectedCompanionMascot(
+                companionType = companionType,
                 mood = mood,
-                size = 120.dp
+                size = 120.dp,
+                animateIdle = true
             )
 
             Spacer(modifier = Modifier.height(20.dp))

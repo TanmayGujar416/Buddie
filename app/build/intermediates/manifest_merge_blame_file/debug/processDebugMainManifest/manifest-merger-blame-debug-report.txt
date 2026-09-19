@@ -48,7 +48,7 @@
 25-->[androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.9\transforms\e546ef59c0b29b5d565753c961e23e29\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 26
 27    <application
-27-->D:\Buddie\app\src\main\AndroidManifest.xml:13:5-54:19
+27-->D:\Buddie\app\src\main\AndroidManifest.xml:13:5-55:19
 28        android:name="com.tanmay.buddie.BuddieApp"
 28-->D:\Buddie\app\src\main\AndroidManifest.xml:14:9-34
 29        android:allowBackup="true"
@@ -69,68 +69,69 @@
 37-->D:\Buddie\app\src\main\AndroidManifest.xml:20:9-54
 38        android:supportsRtl="true"
 38-->D:\Buddie\app\src\main\AndroidManifest.xml:21:9-35
-39        android:testOnly="true"
-40        android:theme="@style/Theme.Buddie" >
-40-->D:\Buddie\app\src\main\AndroidManifest.xml:22:9-44
-41        <activity
-41-->D:\Buddie\app\src\main\AndroidManifest.xml:24:9-32:20
-42            android:name="com.tanmay.buddie.MainActivity"
-42-->D:\Buddie\app\src\main\AndroidManifest.xml:25:13-41
-43            android:exported="true"
-43-->D:\Buddie\app\src\main\AndroidManifest.xml:26:13-36
+39        android:theme="@style/Theme.Buddie" >
+39-->D:\Buddie\app\src\main\AndroidManifest.xml:22:9-44
+40        <activity
+40-->D:\Buddie\app\src\main\AndroidManifest.xml:24:9-33:20
+41            android:name="com.tanmay.buddie.MainActivity"
+41-->D:\Buddie\app\src\main\AndroidManifest.xml:25:13-41
+42            android:exported="true"
+42-->D:\Buddie\app\src\main\AndroidManifest.xml:26:13-36
+43            android:launchMode="singleTop"
+43-->D:\Buddie\app\src\main\AndroidManifest.xml:27:13-43
 44            android:theme="@style/Theme.Buddie" >
-44-->D:\Buddie\app\src\main\AndroidManifest.xml:27:13-48
+44-->D:\Buddie\app\src\main\AndroidManifest.xml:28:13-48
 45            <intent-filter>
-45-->D:\Buddie\app\src\main\AndroidManifest.xml:28:13-31:29
+45-->D:\Buddie\app\src\main\AndroidManifest.xml:29:13-32:29
 46                <action android:name="android.intent.action.MAIN" />
-46-->D:\Buddie\app\src\main\AndroidManifest.xml:29:17-69
-46-->D:\Buddie\app\src\main\AndroidManifest.xml:29:25-66
+46-->D:\Buddie\app\src\main\AndroidManifest.xml:30:17-69
+46-->D:\Buddie\app\src\main\AndroidManifest.xml:30:25-66
 47
 48                <category android:name="android.intent.category.LAUNCHER" />
-48-->D:\Buddie\app\src\main\AndroidManifest.xml:30:17-77
-48-->D:\Buddie\app\src\main\AndroidManifest.xml:30:27-74
+48-->D:\Buddie\app\src\main\AndroidManifest.xml:31:17-77
+48-->D:\Buddie\app\src\main\AndroidManifest.xml:31:27-74
 49            </intent-filter>
 50        </activity>
 51
 52        <service
-52-->D:\Buddie\app\src\main\AndroidManifest.xml:34:9-41:19
+52-->D:\Buddie\app\src\main\AndroidManifest.xml:35:9-42:19
 53            android:name="com.tanmay.buddie.service.BubbleService"
-53-->D:\Buddie\app\src\main\AndroidManifest.xml:35:13-50
+53-->D:\Buddie\app\src\main\AndroidManifest.xml:36:13-50
 54            android:exported="false"
-54-->D:\Buddie\app\src\main\AndroidManifest.xml:37:13-37
+54-->D:\Buddie\app\src\main\AndroidManifest.xml:38:13-37
 55            android:foregroundServiceType="specialUse" >
-55-->D:\Buddie\app\src\main\AndroidManifest.xml:36:13-55
+55-->D:\Buddie\app\src\main\AndroidManifest.xml:37:13-55
 56            <property
-56-->D:\Buddie\app\src\main\AndroidManifest.xml:38:13-40:95
+56-->D:\Buddie\app\src\main\AndroidManifest.xml:39:13-41:95
 57                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-57-->D:\Buddie\app\src\main\AndroidManifest.xml:39:17-76
+57-->D:\Buddie\app\src\main\AndroidManifest.xml:40:17-76
 58                android:value="Floating reminder companion overlay for deadlines and exams" />
-58-->D:\Buddie\app\src\main\AndroidManifest.xml:40:17-92
+58-->D:\Buddie\app\src\main\AndroidManifest.xml:41:17-92
 59        </service>
 60
 61        <receiver
-61-->D:\Buddie\app\src\main\AndroidManifest.xml:43:9-53:20
+61-->D:\Buddie\app\src\main\AndroidManifest.xml:44:9-54:20
 62            android:name="com.tanmay.buddie.receiver.BootReceiver"
-62-->D:\Buddie\app\src\main\AndroidManifest.xml:44:13-50
+62-->D:\Buddie\app\src\main\AndroidManifest.xml:45:13-50
 63            android:enabled="true"
-63-->D:\Buddie\app\src\main\AndroidManifest.xml:45:13-35
+63-->D:\Buddie\app\src\main\AndroidManifest.xml:46:13-35
 64            android:exported="true" >
-64-->D:\Buddie\app\src\main\AndroidManifest.xml:46:13-36
+64-->D:\Buddie\app\src\main\AndroidManifest.xml:47:13-36
 65            <intent-filter>
-65-->D:\Buddie\app\src\main\AndroidManifest.xml:47:13-52:29
+65-->D:\Buddie\app\src\main\AndroidManifest.xml:48:13-53:29
 66                <action android:name="android.intent.action.BOOT_COMPLETED" />
-66-->D:\Buddie\app\src\main\AndroidManifest.xml:48:17-79
-66-->D:\Buddie\app\src\main\AndroidManifest.xml:48:25-76
+66-->D:\Buddie\app\src\main\AndroidManifest.xml:49:17-79
+66-->D:\Buddie\app\src\main\AndroidManifest.xml:49:25-76
 67                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-67-->D:\Buddie\app\src\main\AndroidManifest.xml:49:17-84
-67-->D:\Buddie\app\src\main\AndroidManifest.xml:49:25-81
+67-->D:\Buddie\app\src\main\AndroidManifest.xml:50:17-84
+67-->D:\Buddie\app\src\main\AndroidManifest.xml:50:25-81
 68                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-68-->D:\Buddie\app\src\main\AndroidManifest.xml:50:17-82
-68-->D:\Buddie\app\src\main\AndroidManifest.xml:50:25-79
+68-->D:\Buddie\app\src\main\AndroidManifest.xml:51:17-82
+68-->D:\Buddie\app\src\main\AndroidManifest.xml:51:25-79
 69
 70                <category android:name="android.intent.category.DEFAULT" />
-70-->D:\Buddie\app\src\main\AndroidManifest.xml:51:17-76
-70-->D:\Buddie\app\src\main\AndroidManifest.xml:51:27-73
+70-->D:\Buddie\app\src\main\AndroidManifest.xml:52:17-76
+70-->D:\Buddie\app\src\main\AndroidManifest.xml:52:27-73
 71            </intent-filter>
 72        </receiver>
 73
@@ -301,8 +302,8 @@
 158            <intent-filter>
 158-->[androidx.work:work-runtime:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\cb4808a136b6cd91f0fbedf51cbe9f35\transformed\work-runtime-2.8.1\AndroidManifest.xml:116:13-120:29
 159                <action android:name="android.intent.action.BOOT_COMPLETED" />
-159-->D:\Buddie\app\src\main\AndroidManifest.xml:48:17-79
-159-->D:\Buddie\app\src\main\AndroidManifest.xml:48:25-76
+159-->D:\Buddie\app\src\main\AndroidManifest.xml:49:17-79
+159-->D:\Buddie\app\src\main\AndroidManifest.xml:49:25-76
 160                <action android:name="android.intent.action.TIME_SET" />
 160-->[androidx.work:work-runtime:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\cb4808a136b6cd91f0fbedf51cbe9f35\transformed\work-runtime-2.8.1\AndroidManifest.xml:118:17-73
 160-->[androidx.work:work-runtime:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\cb4808a136b6cd91f0fbedf51cbe9f35\transformed\work-runtime-2.8.1\AndroidManifest.xml:118:25-70

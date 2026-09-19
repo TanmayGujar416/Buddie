@@ -38,5 +38,44 @@ The mascot's mood must be visible regardless of whether a screen's list is empty
 - Idle micro-animation for the Calm state (e.g. gentle breathing/bob) so the bubble doesn't look static/dead on screen.
 - A short one-off animation for completing a task (celebration) and for entering the Overdue state (transition into dramatic pose) — both should be brief, not looping.
 
-## Open decision
-Exact species/shape (generic blob vs. a specific animal) isn't locked yet — treat this doc as the requirements the mascot must satisfy, and propose 2-3 concrete visual directions against it before committing to final art.
+## Companion system (multi-character)
+The app supports multiple selectable companion characters, chosen once in Settings (CompanionType, stored alongside cardStyle in UserSettings). Every companion expresses the same four app-driven mood states (CALM / AWARE / URGENT / OVERDUE per the same deadline-proximity logic already built), but through its own natural expression vocabulary — not a shared rig recolored per character. Each companion below is its own fully distinct design.
+
+---
+
+## Companion 1 — "Buddie" (default)
+[See character brief and mood table above — unchanged.]
+
+---
+
+## Companion 2 — Cat ("Momo")
+Sleek, playful/mischievous archetype — the visual opposite of Buddie's soft innocence.
+
+**Form**: sleek, slightly elongated oval body (less round than Buddie), two triangular pointed ears on top, a curled tail extending from the base, two or three thin whisker lines on each cheek. No visible legs/paws — same minimalist "body + face" economy as Buddie.
+
+**Color**: soft lavender-purple body, deep plum/dark-purple outline (not brown — this is a deliberate departure to help it read as a different character at a glance), soft pink cheek blush.
+
+**Mood expressions**:
+| State | Expression |
+|---|---|
+| CALM | Half-lidded, content eyes; closed-mouth small smirk (not a full smile — carries the mischievous personality even at rest); tail curled loosely at the side |
+| AWARE | Ears perk fully upright, eyes widen slightly, tail straightens/flicks — a "noticed something" cat posture |
+| URGENT | Eyes wide with small shrunk pupils, ears flatten back slightly, tail puffs up — classic startled-cat cues |
+| OVERDUE | Eyes droop half-closed, tail droops down and drags, slumped posture — comically "given up," not sad-crying like Buddie's tears |
+
+---
+
+## Companion 3 — Cloud/Ghost ("Wisp")
+Soft, dreamy/chill archetype — floats rather than sits.
+
+**Form**: amorphous soft cloud/ghost blob, NO flat bottom (unlike Buddie) — trails off into a soft wavy, wispy tail at the base, like a classic gentle ghost silhouette. Reads as floating, not grounded.
+
+**Color**: pale sky-blue to soft lavender gradient body, a light soft grey-blue outline (noticeably lighter/softer than Buddie's warm brown or Momo's deep plum — reinforces the dreamy, airy feel), no cheek blush (keeps it ethereal rather than cutesy-warm).
+
+**Mood expressions**:
+| State | Expression |
+|---|---|
+| CALM | Eyes closed in gentle downward dreamy arcs, small sparkle motifs drifting near it, wispy tail swaying slowly |
+| AWARE | One eye partially opens, slight head tilt as if listening |
+| URGENT | Wispy trailing tail becomes jagged/quivering instead of smooth, eyes open wide and round |
+| OVERDUE | Body sinks/deflates lower and smaller, eyes become soft teardrop shapes, wispy tail flattens against the ground instead of floating |

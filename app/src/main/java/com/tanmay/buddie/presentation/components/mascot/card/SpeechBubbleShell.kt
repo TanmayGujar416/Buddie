@@ -23,8 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tanmay.buddie.presentation.components.mascot.BuddieMascot
+import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
+import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel
 import com.tanmay.buddie.presentation.screens.home.HomeViewModel
 import com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel
@@ -37,10 +38,20 @@ fun SpeechBubbleShell(
     timetableViewModel: TimetableViewModel,
     examsViewModel: ExamsViewModel,
     onCollapse: () -> Unit,
-    onOpenApp: () -> Unit,
-    modifier: Modifier = Modifier
+    onOpenApp: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE,
+    animateIdle: Boolean = true
 ) {
     var selectedSection by remember { mutableStateOf(CardSection.SUBMISSIONS) }
+
+    val activeRoute = remember(selectedSection) {
+        when (selectedSection) {
+            CardSection.SUBMISSIONS -> "home"
+            CardSection.TIMETABLE -> "timetable"
+            CardSection.EXAMS -> "exams"
+        }
+    }
 
     Column(
         modifier = modifier
@@ -60,7 +71,10 @@ fun SpeechBubbleShell(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onCollapse() }
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onOpenApp(activeRoute) }
+                    .padding(4.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -68,15 +82,16 @@ fun SpeechBubbleShell(
                         .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    BuddieMascot(
+                    SelectedCompanionMascot(
+                        companionType = companionType,
                         mood = mood,
                         size = 46.dp,
-                        animateIdle = true
+                        animateIdle = animateIdle
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Buddie",
+                    text = companionType.displayName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -125,7 +140,7 @@ fun SpeechBubbleShell(
                 .heightIn(min = 180.dp, max = 500.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Header with pill tabs (full card width!)
+                // Header with pill tabs (distinct Comic/AccentBlue styling)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -182,15 +197,21 @@ fun SpeechBubbleShell(
                         when (section) {
                             CardSection.SUBMISSIONS -> SubmissionsSection(
                                 viewModel = homeViewModel,
-                                onOpenApp = onOpenApp
+                                onOpenApp = { onOpenApp("home") },
+                                companionType = companionType,
+                                animateIdle = animateIdle
                             )
                             CardSection.TIMETABLE -> TimetableSection(
                                 viewModel = timetableViewModel,
-                                onOpenApp = onOpenApp
+                                onOpenApp = { onOpenApp("timetable") },
+                                companionType = companionType,
+                                animateIdle = animateIdle
                             )
                             CardSection.EXAMS -> ExamsSection(
                                 viewModel = examsViewModel,
-                                onOpenApp = onOpenApp
+                                onOpenApp = { onOpenApp("exams") },
+                                companionType = companionType,
+                                animateIdle = animateIdle
                             )
                         }
                     }
@@ -214,7 +235,7 @@ fun SpeechBubbleShell(
                     )
 
                     TextButton(
-                        onClick = onOpenApp,
+                        onClick = { onOpenApp(activeRoute) },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Row(

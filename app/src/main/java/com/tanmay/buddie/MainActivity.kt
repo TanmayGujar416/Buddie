@@ -1,32 +1,10 @@
 package com.tanmay.buddie
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupScreen
-import com.tanmay.buddie.presentation.theme.BuddieTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.getValue
-import androidx.navigation.compose.currentBackStackEntryAsState
-
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,27 +12,102 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import com.tanmay.buddie.presentation.theme.CharcoalBackground
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.tanmay.buddie.data.datastore.UserPreferences
+import com.tanmay.buddie.domain.repository.SubjectRepository
+import com.tanmay.buddie.domain.repository.TimetableRepository
+import com.tanmay.buddie.presentation.screens.exams.ExamsScreen
+import com.tanmay.buddie.presentation.screens.forms.AddEditExamScreen
+import com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionScreen
+import com.tanmay.buddie.presentation.screens.home.HomeScreen
+import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupScreen
+import com.tanmay.buddie.presentation.screens.settings.SettingsScreen
+import com.tanmay.buddie.presentation.screens.timetable.TimetableScreen
 import com.tanmay.buddie.presentation.theme.AccentBlue
 import com.tanmay.buddie.presentation.theme.AccentBlueLight
+import com.tanmay.buddie.presentation.theme.BuddieTheme
+import com.tanmay.buddie.presentation.theme.CharcoalBackground
 import com.tanmay.buddie.presentation.theme.TextPrimary
 import com.tanmay.buddie.presentation.theme.TextSecondary
-import com.tanmay.buddie.data.datastore.UserPreferences
 import com.tanmay.buddie.service.BubbleService
-import android.provider.Settings
-import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        const val EXTRA_TARGET_TAB = "extra_target_tab"
+    }
+
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    @Inject
+    lateinit var subjectRepository: SubjectRepository
+
+    @Inject
+    lateinit var timetableRepository: TimetableRepository
+
+    private val targetTabFlow = MutableStateFlow<String?>(null)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val target = intent.getStringExtra(EXTRA_TARGET_TAB)
+        if (target != null) {
+            targetTabFlow.value = target
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val initialTarget = intent?.getStringExtra(EXTRA_TARGET_TAB)
+        if (initialTarget != null) {
+            targetTabFlow.value = initialTarget
+        }
+
+        // Auto-migration: if existing user already has subjects or timetable slots, mark onboarding as completed
+        lifecycleScope.launch {
+            try {
+                val completed = userPreferences.onboardingCompletedFlow.first()
+                if (!completed) {
+                    val hasSlots = timetableRepository.getAllSlots().first().isNotEmpty()
+                    val hasSubjects = subjectRepository.getAllSubjects().first().isNotEmpty()
+                    if (hasSlots || hasSubjects) {
+                        userPreferences.setOnboardingCompleted(true)
+                    }
+                }
+            } catch (_: Exception) {}
+        }
 
         // Ensure BubbleService starts on launch if enabled and overlay permission is granted
         lifecycleScope.launch {
@@ -67,9 +120,39 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             BuddieTheme {
+                val isOnboardingCompleted by userPreferences.onboardingCompletedFlow.collectAsState(initial = null)
+
+                if (isOnboardingCompleted == null) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = CharcoalBackground
+                    ) {}
+                    return@BuddieTheme
+                }
+
+                val startDestination = if (isOnboardingCompleted == true) "home" else "onboarding"
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
+
+                fun navigateToTab(route: String) {
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+
+                val targetTab by targetTabFlow.collectAsState()
+                LaunchedEffect(targetTab) {
+                    val target = targetTab ?: return@LaunchedEffect
+                    if (target in listOf("home", "timetable", "exams", "settings")) {
+                        navigateToTab(target)
+                        targetTabFlow.value = null
+                    }
+                }
 
                 Scaffold(
                     containerColor = CharcoalBackground,
@@ -90,30 +173,30 @@ class MainActivity : ComponentActivity() {
 
                                 NavigationBarItem(
                                     icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                                    label = { androidx.compose.material3.Text("Home") },
+                                    label = { Text("Home") },
                                     selected = currentRoute == "home",
-                                    onClick = { navController.navigate("home") { launchSingleTop = true } },
+                                    onClick = { navigateToTab("home") },
                                     colors = navItemColors
                                 )
                                 NavigationBarItem(
                                     icon = { Icon(Icons.Default.DateRange, contentDescription = "Timetable") },
-                                    label = { androidx.compose.material3.Text("Timetable") },
+                                    label = { Text("Timetable") },
                                     selected = currentRoute == "timetable",
-                                    onClick = { navController.navigate("timetable") { launchSingleTop = true } },
+                                    onClick = { navigateToTab("timetable") },
                                     colors = navItemColors
                                 )
                                 NavigationBarItem(
                                     icon = { Icon(Icons.Default.Edit, contentDescription = "Exams") },
-                                    label = { androidx.compose.material3.Text("Exams") },
+                                    label = { Text("Exams") },
                                     selected = currentRoute == "exams",
-                                    onClick = { navController.navigate("exams") { launchSingleTop = true } },
+                                    onClick = { navigateToTab("exams") },
                                     colors = navItemColors
                                 )
                                 NavigationBarItem(
                                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                                    label = { androidx.compose.material3.Text("Settings") },
+                                    label = { Text("Settings") },
                                     selected = currentRoute == "settings",
-                                    onClick = { navController.navigate("settings") { launchSingleTop = true } },
+                                    onClick = { navigateToTab("settings") },
                                     colors = navItemColors
                                 )
                             }
@@ -126,7 +209,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         NavHost(
                             navController = navController,
-                            startDestination = "onboarding",
+                            startDestination = startDestination,
                             enterTransition = {
                                 fadeIn(animationSpec = tween(240)) + slideInHorizontally(
                                     initialOffsetX = { 36 },
@@ -149,29 +232,36 @@ class MainActivity : ComponentActivity() {
                             composable("onboarding") {
                                 TimetableSetupScreen(
                                     onSetupComplete = {
-                                        navController.navigate("home") {
-                                            popUpTo("onboarding") { inclusive = true }
+                                        lifecycleScope.launch {
+                                            userPreferences.setOnboardingCompleted(true)
+                                        }
+                                        if (navController.previousBackStackEntry != null) {
+                                            navController.popBackStack()
+                                        } else {
+                                            navController.navigate("home") {
+                                                popUpTo("onboarding") { inclusive = true }
+                                            }
                                         }
                                     }
                                 )
                             }
                             composable("home") {
-                                com.tanmay.buddie.presentation.screens.home.HomeScreen(
+                                HomeScreen(
                                     onAddSubmissionClick = { navController.navigate("add_edit_submission") },
                                     onEditSubmissionClick = { id -> navController.navigate("add_edit_submission?submissionId=$id") }
                                 )
                             }
                             composable("timetable") {
-                                com.tanmay.buddie.presentation.screens.timetable.TimetableScreen()
+                                TimetableScreen()
                             }
                             composable("exams") {
-                                com.tanmay.buddie.presentation.screens.exams.ExamsScreen(
+                                ExamsScreen(
                                     onAddExamClick = { navController.navigate("add_edit_exam") },
                                     onEditExamClick = { id -> navController.navigate("add_edit_exam?examId=$id") }
                                 )
                             }
                             composable("settings") {
-                                com.tanmay.buddie.presentation.screens.settings.SettingsScreen(
+                                SettingsScreen(
                                     onEditTimetableClick = { navController.navigate("onboarding") }
                                 )
                             }
@@ -191,8 +281,12 @@ class MainActivity : ComponentActivity() {
                                     slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
                                 }
                             ) {
-                                com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionScreen(
-                                    onNavigateBack = { navController.popBackStack() }
+                                AddEditSubmissionScreen(
+                                    onNavigateBack = {
+                                        if (!navController.popBackStack()) {
+                                            navigateToTab("home")
+                                        }
+                                    }
                                 )
                             }
                             composable(
@@ -211,8 +305,12 @@ class MainActivity : ComponentActivity() {
                                     slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
                                 }
                             ) {
-                                com.tanmay.buddie.presentation.screens.forms.AddEditExamScreen(
-                                    onNavigateBack = { navController.popBackStack() }
+                                AddEditExamScreen(
+                                    onNavigateBack = {
+                                        if (!navController.popBackStack()) {
+                                            navigateToTab("exams")
+                                        }
+                                    }
                                 )
                             }
                         }

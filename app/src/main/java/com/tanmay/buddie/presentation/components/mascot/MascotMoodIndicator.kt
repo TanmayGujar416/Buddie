@@ -22,7 +22,8 @@ import com.tanmay.buddie.presentation.theme.*
 @Composable
 fun MascotMoodIndicator(
     mood: MascotMood,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    companionType: CompanionType = CompanionType.BUDDIE
 ) {
     val moodLabel = when (mood) {
         MascotMood.CALM -> "Calm"
@@ -31,12 +32,7 @@ fun MascotMoodIndicator(
         MascotMood.OVERDUE -> "Overdue"
     }
 
-    val moodColor = when (mood) {
-        MascotMood.CALM -> AccentBlueLight
-        MascotMood.AWARE -> StatusWarning
-        MascotMood.URGENT -> StatusError
-        MascotMood.OVERDUE -> StatusError
-    }
+    val moodColor = MascotMoodHelper.getMoodDotColor(mood)
 
     Surface(
         modifier = modifier.semantics { contentDescription = "Current mascot mood: $moodLabel" },
@@ -49,7 +45,8 @@ fun MascotMoodIndicator(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            BuddieMascot(
+            SelectedCompanionMascot(
+                companionType = companionType,
                 mood = mood,
                 size = 32.dp,
                 animateIdle = true
