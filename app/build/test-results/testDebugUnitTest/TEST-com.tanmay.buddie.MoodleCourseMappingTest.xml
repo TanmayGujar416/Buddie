@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.tanmay.buddie.MoodleCourseMappingTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.013">
+  <properties/>
+  <testcase name="getSiteInfo_success_parsesUserIdAndDetails" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.004"/>
+  <testcase name="getEnrolledCourses_success_parsesCoursesList" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.003"/>
+  <testcase name="getSiteInfo_moodleException_returnsFailure" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.002"/>
+  <testcase name="repository_handlesManyToOneMappingAndCascadeSimulation" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.002"/>
+  <testcase name="ignoredCourse_hasNullSubjectId" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.0"/>
+  <testcase name="getEnrolledCourses_errorResponse_returnsFailure" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.002"/>
+  <testcase name="manyCoursesMappingToSameSubject_isSupported" classname="com.tanmay.buddie.MoodleCourseMappingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -28,7 +28,7 @@ class GetMascotMoodUseCase @Inject constructor(
             submissionRepository.getAllSubmissions(),
             examRepository.getAllExams()
         ) { submissions, exams ->
-            val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE }
+            val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE && !it.filteredOut && !it.needsReview }
             val allDeadlines = activeSubmissions.map { it.deadline } + exams.map { it.datetime }
             MascotMoodHelper.calculateMood(allDeadlines)
         }.debounce(300L)

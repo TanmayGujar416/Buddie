@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -57,7 +58,11 @@ import com.tanmay.buddie.service.BubbleService
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onEditTimetableClick: () -> Unit
+    onEditTimetableClick: () -> Unit,
+    onConnectMoodleClick: () -> Unit,
+    onMapCoursesClick: () -> Unit = {},
+    onFilterCodesClick: () -> Unit = {},
+    onSyncPreviewClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -585,6 +590,278 @@ fun SettingsScreen(
                             color = AccentBlueLight,
                             fontWeight = FontWeight.SemiBold
                         )
+                    }
+                }
+
+                Divider(color = DividerFaint, thickness = 0.5.dp)
+
+                // Moodle Connection section
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Moodle Connection",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                    Text(
+                        text = "Link your college Moodle account to synchronize assignments and course schedules",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+
+                    Card(
+                        shape = CardShape,
+                        colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                        border = BorderStroke(1.dp, BorderOutline),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .clip(CircleShape)
+                                            .background(if (uiState.isMoodleConnected) StatusSuccess else TextMuted)
+                                    )
+                                    Text(
+                                        text = if (uiState.isMoodleConnected) "Connected" else "Not connected",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (uiState.isMoodleConnected) StatusSuccess else TextSecondary
+                                    )
+                                }
+
+                                if (uiState.isMoodleConnected && !uiState.moodleSiteUrl.isNullOrBlank()) {
+                                    Text(
+                                        text = uiState.moodleSiteUrl?.removePrefix("https://")?.removePrefix("http://") ?: "",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = AccentBlueLight,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+
+                            if (uiState.isMoodleConnected) {
+                                Text(
+                                    text = "Access token is encrypted with Android Keystore. Your username and password are not stored.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextMuted,
+                                    fontSize = 11.5.sp
+                                )
+
+                                if (uiState.syncMessage != null) {
+                                    Card(
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = if (uiState.syncMessage!!.startsWith("Sync error")) StatusError.copy(alpha = 0.12f) else AccentBlue.copy(alpha = 0.12f)
+                                        ),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (uiState.syncMessage!!.startsWith("Sync error")) StatusError.copy(alpha = 0.35f) else AccentBlue.copy(alpha = 0.35f)
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = uiState.syncMessage ?: "",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = TextPrimary,
+                                                fontWeight = FontWeight.Medium,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            IconButton(
+                                                onClick = { viewModel.clearSyncMessage() },
+                                                modifier = Modifier.size(24.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = "Dismiss",
+                                                    tint = TextSecondary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Button(
+                                    onClick = { viewModel.runSync() },
+                                    enabled = !uiState.isSyncing,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AccentBlue,
+                                        contentColor = TextPrimary
+                                    )
+                                ) {
+                                    if (uiState.isSyncing) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            color = TextPrimary,
+                                            strokeWidth = 2.dp
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Syncing with Moodle...",
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "Sync Now",
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                Button(
+                                    onClick = onMapCoursesClick,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = CharcoalSurfaceElevated,
+                                        contentColor = TextPrimary
+                                    ),
+                                    border = BorderStroke(1.dp, BorderOutline)
+                                ) {
+                                    Text(
+                                        text = "Course Mappings",
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+
+                                OutlinedButton(
+                                    onClick = onFilterCodesClick,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, BorderOutline),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
+                                ) {
+                                    Text(
+                                        text = "Batch Filters & Review",
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = TextSecondary
+                                    )
+                                }
+
+                                OutlinedButton(
+                                    onClick = onSyncPreviewClick,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, BorderOutline),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
+                                ) {
+                                    Text(
+                                        text = "Sync Preview (Raw Fetch)",
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = TextSecondary
+                                    )
+                                }
+
+                                var showDisconnectDialog by remember { mutableStateOf(false) }
+
+                                if (showDisconnectDialog) {
+                                    AlertDialog(
+                                        onDismissRequest = { showDisconnectDialog = false },
+                                        title = { Text("Disconnect Moodle?", color = TextPrimary) },
+                                        text = {
+                                            Text(
+                                                "This will remove your stored authentication token and institution URL from Buddie.",
+                                                color = TextSecondary
+                                            )
+                                        },
+                                        confirmButton = {
+                                            TextButton(
+                                                onClick = {
+                                                    viewModel.disconnectMoodle()
+                                                    showDisconnectDialog = false
+                                                }
+                                            ) {
+                                                Text("Disconnect", color = StatusError, fontWeight = FontWeight.Bold)
+                                            }
+                                        },
+                                        dismissButton = {
+                                            TextButton(onClick = { showDisconnectDialog = false }) {
+                                                Text("Cancel", color = TextSecondary)
+                                            }
+                                        },
+                                        containerColor = CharcoalSurfaceElevated,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                }
+
+                                OutlinedButton(
+                                    onClick = { showDisconnectDialog = true },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, StatusError.copy(alpha = 0.5f)),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError)
+                                ) {
+                                    Text(
+                                        text = "Disconnect",
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = "Connect to your institution's Moodle portal to sync deadlines and coursework directly into Buddie.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    lineHeight = 17.sp
+                                )
+
+                                Button(
+                                    onClick = onConnectMoodleClick,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AccentBlue,
+                                        contentColor = TextPrimary
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Connect Moodle",
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

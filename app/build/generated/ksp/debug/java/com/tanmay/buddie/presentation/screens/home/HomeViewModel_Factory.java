@@ -2,8 +2,10 @@ package com.tanmay.buddie.presentation.screens.home;
 
 import com.tanmay.buddie.data.datastore.UserPreferences;
 import com.tanmay.buddie.domain.repository.ExamRepository;
+import com.tanmay.buddie.domain.repository.FilterCodeRepository;
 import com.tanmay.buddie.domain.repository.SubjectRepository;
 import com.tanmay.buddie.domain.repository.SubmissionRepository;
+import com.tanmay.buddie.domain.sync.MoodleContentSyncEngine;
 import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -36,21 +38,29 @@ public final class HomeViewModel_Factory implements Factory<HomeViewModel> {
 
   private final Provider<UserPreferences> userPreferencesProvider;
 
+  private final Provider<FilterCodeRepository> filterCodeRepositoryProvider;
+
+  private final Provider<MoodleContentSyncEngine> syncEngineProvider;
+
   public HomeViewModel_Factory(Provider<SubmissionRepository> submissionRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
       Provider<ExamRepository> examRepositoryProvider,
       Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider,
-      Provider<UserPreferences> userPreferencesProvider) {
+      Provider<UserPreferences> userPreferencesProvider,
+      Provider<FilterCodeRepository> filterCodeRepositoryProvider,
+      Provider<MoodleContentSyncEngine> syncEngineProvider) {
     this.submissionRepositoryProvider = submissionRepositoryProvider;
     this.subjectRepositoryProvider = subjectRepositoryProvider;
     this.examRepositoryProvider = examRepositoryProvider;
     this.getMascotMoodUseCaseProvider = getMascotMoodUseCaseProvider;
     this.userPreferencesProvider = userPreferencesProvider;
+    this.filterCodeRepositoryProvider = filterCodeRepositoryProvider;
+    this.syncEngineProvider = syncEngineProvider;
   }
 
   @Override
   public HomeViewModel get() {
-    return newInstance(submissionRepositoryProvider.get(), subjectRepositoryProvider.get(), examRepositoryProvider.get(), getMascotMoodUseCaseProvider.get(), userPreferencesProvider.get());
+    return newInstance(submissionRepositoryProvider.get(), subjectRepositoryProvider.get(), examRepositoryProvider.get(), getMascotMoodUseCaseProvider.get(), userPreferencesProvider.get(), filterCodeRepositoryProvider.get(), syncEngineProvider.get());
   }
 
   public static HomeViewModel_Factory create(
@@ -58,13 +68,16 @@ public final class HomeViewModel_Factory implements Factory<HomeViewModel> {
       Provider<SubjectRepository> subjectRepositoryProvider,
       Provider<ExamRepository> examRepositoryProvider,
       Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider,
-      Provider<UserPreferences> userPreferencesProvider) {
-    return new HomeViewModel_Factory(submissionRepositoryProvider, subjectRepositoryProvider, examRepositoryProvider, getMascotMoodUseCaseProvider, userPreferencesProvider);
+      Provider<UserPreferences> userPreferencesProvider,
+      Provider<FilterCodeRepository> filterCodeRepositoryProvider,
+      Provider<MoodleContentSyncEngine> syncEngineProvider) {
+    return new HomeViewModel_Factory(submissionRepositoryProvider, subjectRepositoryProvider, examRepositoryProvider, getMascotMoodUseCaseProvider, userPreferencesProvider, filterCodeRepositoryProvider, syncEngineProvider);
   }
 
   public static HomeViewModel newInstance(SubmissionRepository submissionRepository,
       SubjectRepository subjectRepository, ExamRepository examRepository,
-      GetMascotMoodUseCase getMascotMoodUseCase, UserPreferences userPreferences) {
-    return new HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase, userPreferences);
+      GetMascotMoodUseCase getMascotMoodUseCase, UserPreferences userPreferences,
+      FilterCodeRepository filterCodeRepository, MoodleContentSyncEngine syncEngine) {
+    return new HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase, userPreferences, filterCodeRepository, syncEngine);
   }
 }

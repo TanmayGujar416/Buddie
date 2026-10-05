@@ -21,6 +21,10 @@ import com.tanmay.buddie.data.datastore.UserPreferences
 import com.tanmay.buddie.presentation.components.mascot.CompanionType
 import javax.inject.Inject
 
+import com.tanmay.buddie.domain.repository.FilterCodeRepository
+import com.tanmay.buddie.domain.sync.MoodleContentSyncEngine
+import com.tanmay.buddie.domain.sync.MoodleItemFilter
+
 data class HomeUiState(
     val submissions: List<SubmissionWithSubject> = emptyList(),
     val isLoading: Boolean = true,
@@ -39,12 +43,28 @@ class HomeViewModel @Inject constructor(
     private val subjectRepository: SubjectRepository,
     private val examRepository: ExamRepository,
     private val getMascotMoodUseCase: GetMascotMoodUseCase,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val filterCodeRepository: FilterCodeRepository,
+    private val syncEngine: MoodleContentSyncEngine
 ) : ViewModel() {
 
     // Cache the previous status before marking done, ensuring undo preserves
     // the exact original state (e.g. IN_PROGRESS or NOT_STARTED).
     private val previousStatuses = ConcurrentHashMap<String, SubmissionStatus>()
+
+    init {
+        syncMoodleOnOpen()
+    }
+
+    fun syncMoodleOnOpen() {
+        viewModelScope.launch {
+            try {
+                syncEngine.syncIfStale(staleThresholdMillis = 5 * 60 * 1000L)
+            } catch (_: Exception) {
+                // Background sync failure handled gracefully without UI disruption
+            }
+        }
+    }
 
     val uiState: StateFlow<HomeUiState> = combine(
         submissionRepository.getAllSubmissions(),
@@ -52,7 +72,7 @@ class HomeViewModel @Inject constructor(
         getMascotMoodUseCase(),
         userPreferences.companionTypeFlow
     ) { submissions, subjects, mood, companionType ->
-        val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE }
+        val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE && !it.filteredOut && !it.needsReview }
         val mapped = activeSubmissions
             .map { sub ->
                 SubmissionWithSubject(
@@ -98,6 +118,43 @@ class HomeViewModel @Inject constructor(
     fun restoreSubmission(submission: SubmissionEntity) {
         viewModelScope.launch {
             submissionRepository.insertSubmission(submission)
+        }
+    }
+
+    /**
+     * Hides a Moodle assignment by adding its batch-shaped token(s) as an EXCLUDE filter code (isMine = false)
+     * and reapplying filters and merge with zero network calls.
+     */
+    fun hideMoodleSubmission(submission: SubmissionEntity) {
+        viewModelScope.launch {
+            val tokens = MoodleItemFilter.tokenize(submission.title)
+            val batchTokens = tokens.filter { MoodleItemFilter.isBatchShapedToken(it) }.ifEmpty { tokens }
+            for (token in batchTokens) {
+                filterCodeRepository.saveFilterCode(
+                    subjectId = submission.subjectId,
+                    code = token,
+                    isMine = false
+                )
+            }
+            syncEngine.reapplyFiltersAndMerge()
+        }
+    }
+
+    /**
+     * Unhides a previously hidden Moodle assignment by deleting the blocking code
+     * (or setting isMine = true) and reapplying filters and merge with zero network calls.
+     */
+    fun unhideMoodleSubmission(submission: SubmissionEntity) {
+        viewModelScope.launch {
+            val tokens = MoodleItemFilter.tokenize(submission.title)
+            val batchTokens = tokens.filter { MoodleItemFilter.isBatchShapedToken(it) }.ifEmpty { tokens }
+            for (token in batchTokens) {
+                filterCodeRepository.deleteFilterCode(
+                    subjectId = submission.subjectId,
+                    code = token
+                )
+            }
+            syncEngine.reapplyFiltersAndMerge()
         }
     }
 }

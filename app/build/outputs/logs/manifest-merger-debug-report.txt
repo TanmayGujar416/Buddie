@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-56:12
-INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-56:12
-INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-56:12
-INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-56:12
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-57:12
+INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-57:12
+INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-57:12
+INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:2:1-57:12
 MERGED from [androidx.room:room-ktx:2.6.0] C:\Users\User\.gradle\caches\8.9\transforms\048066c61e0ece59d375bf3fa8905d2d\transformed\room-ktx-2.6.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.work:work-runtime-ktx:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\c63def05c7653bfa9dfab7c8da30ec65\transformed\work-runtime-ktx-2.8.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.work:work-runtime:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\cb4808a136b6cd91f0fbedf51cbe9f35\transformed\work-runtime-2.8.1\AndroidManifest.xml:17:1-145:12
@@ -58,12 +58,13 @@ MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.4] C:\Users\U
 MERGED from [androidx.compose.runtime:runtime-android:1.5.4] C:\Users\User\.gradle\caches\8.9\transforms\9aefd1ecbaf6e6005d96ba5284a6b537\transformed\runtime-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.datastore:datastore-preferences:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\f03b92e52c67ecac19c35855099f0153\transformed\datastore-preferences-1.0.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.datastore:datastore:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\ca357591fa3916fc9fd5c32edfd90cba\transformed\datastore-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] C:\Users\User\.gradle\caches\8.9\transforms\54424e41d6497f2fdfa62110533a1d12\transformed\security-crypto-1.1.0-alpha06\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.sqlite:sqlite-framework:2.4.0] C:\Users\User\.gradle\caches\8.9\transforms\6b757ebe0b274a9979c85960ffee1983\transformed\sqlite-framework-2.4.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.sqlite:sqlite:2.4.0] C:\Users\User\.gradle\caches\8.9\transforms\51e046ff7f9394f1f25f5dd7e35a224e\transformed\sqlite-2.4.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\User\.gradle\caches\8.9\transforms\dec7cf39a7799574d4df9aa5a52faf2f\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\User\.gradle\caches\8.9\transforms\36a43a85f3d4d93f507d530651cf67d5\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\482d48cbf743c9b7a144beff97fd5117\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\User\.gradle\caches\8.9\transforms\9f6111612c2dba1a717c887cf3d807eb\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\482d48cbf743c9b7a144beff97fd5117\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\User\.gradle\caches\8.9\transforms\f2804292926d109d76eb5413fc24f9d8\transformed\profileinstaller-1.3.0\AndroidManifest.xml:17:1-55:12
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\User\.gradle\caches\8.9\transforms\02fa3256e554b622bfee9256d9f82de5\transformed\startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\31f1f49657fc1d15537e12fea1acd765\transformed\tracing-1.0.0\AndroidManifest.xml:17:1-24:12
@@ -110,9 +111,13 @@ uses-permission#android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:11:5-95
 	android:name
 		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:11:22-92
+uses-permission#android.permission.INTERNET
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:12:5-67
+	android:name
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:12:22-64
 application
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:13:5-55:19
-INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:13:5-55:19
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:14:5-56:19
+INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml:14:5-56:19
 MERGED from [androidx.work:work-runtime:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\cb4808a136b6cd91f0fbedf51cbe9f35\transformed\work-runtime-2.8.1\AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.work:work-runtime:2.8.1] C:\Users\User\.gradle\caches\8.9\transforms\cb4808a136b6cd91f0fbedf51cbe9f35\transformed\work-runtime-2.8.1\AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.room:room-runtime:2.6.0] C:\Users\User\.gradle\caches\8.9\transforms\b0e6eeefe454edbecc1c84996b5db46c\transformed\room-runtime-2.6.0\AndroidManifest.xml:23:5-29:19
@@ -134,85 +139,85 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\User\.gradle\cache
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.9\transforms\e546ef59c0b29b5d565753c961e23e29\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:21:9-35
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:22:9-35
 	android:label
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:19:9-41
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:20:9-41
 	android:fullBackupContent
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:17:9-54
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:18:9-54
 	android:roundIcon
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:20:9-54
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:21:9-54
 	tools:targetApi
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:23:9-29
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:24:9-29
 	android:icon
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:18:9-43
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:19:9-43
 	android:allowBackup
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:15:9-35
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:16:9-35
 	android:theme
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:22:9-44
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:23:9-44
 	android:dataExtractionRules
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:16:9-65
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:17:9-65
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:14:9-34
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:15:9-34
 activity#com.tanmay.buddie.MainActivity
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:24:9-33:20
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:25:9-34:20
 	android:launchMode
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:27:13-43
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:28:13-43
 	android:exported
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:26:13-36
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:27:13-36
 	android:theme
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:28:13-48
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:29:13-48
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:25:13-41
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:26:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:29:13-32:29
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:30:13-33:29
 action#android.intent.action.MAIN
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:30:17-69
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:31:17-69
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:30:25-66
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:31:25-66
 category#android.intent.category.LAUNCHER
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:31:17-77
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:32:17-77
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:31:27-74
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:32:27-74
 service#com.tanmay.buddie.service.BubbleService
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:35:9-42:19
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:36:9-43:19
 	android:exported
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:38:13-37
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:39:13-37
 	android:foregroundServiceType
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:37:13-55
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:38:13-55
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:36:13-50
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:37:13-50
 property#android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:39:13-41:95
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:40:13-42:95
 	android:value
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:41:17-92
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:42:17-92
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:40:17-76
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:41:17-76
 receiver#com.tanmay.buddie.receiver.BootReceiver
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:44:9-54:20
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:45:9-55:20
 	android:enabled
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:46:13-35
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:47:13-35
 	android:exported
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:47:13-36
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:48:13-36
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:45:13-50
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:46:13-50
 intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.MY_PACKAGE_REPLACED+action:name:android.intent.action.QUICKBOOT_POWERON+category:name:android.intent.category.DEFAULT
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:48:13-53:29
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:49:13-54:29
 action#android.intent.action.BOOT_COMPLETED
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:49:17-79
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:50:17-79
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:49:25-76
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:50:25-76
 action#android.intent.action.MY_PACKAGE_REPLACED
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:50:17-84
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:51:17-84
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:50:25-81
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:51:25-81
 action#android.intent.action.QUICKBOOT_POWERON
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:51:17-82
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:52:17-82
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:51:25-79
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:52:25-79
 category#android.intent.category.DEFAULT
-ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:52:17-76
+ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:53:17-76
 	android:name
-		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:52:27-73
+		ADDED from D:\Buddie\app\src\main\AndroidManifest.xml:53:27-73
 uses-sdk
 INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\Buddie\app\src\main\AndroidManifest.xml
@@ -325,6 +330,8 @@ MERGED from [androidx.datastore:datastore-preferences:1.0.0] C:\Users\User\.grad
 MERGED from [androidx.datastore:datastore-preferences:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\f03b92e52c67ecac19c35855099f0153\transformed\datastore-preferences-1.0.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.datastore:datastore:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\ca357591fa3916fc9fd5c32edfd90cba\transformed\datastore-1.0.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.datastore:datastore:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\ca357591fa3916fc9fd5c32edfd90cba\transformed\datastore-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] C:\Users\User\.gradle\caches\8.9\transforms\54424e41d6497f2fdfa62110533a1d12\transformed\security-crypto-1.1.0-alpha06\AndroidManifest.xml:20:5-44
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] C:\Users\User\.gradle\caches\8.9\transforms\54424e41d6497f2fdfa62110533a1d12\transformed\security-crypto-1.1.0-alpha06\AndroidManifest.xml:20:5-44
 MERGED from [androidx.sqlite:sqlite-framework:2.4.0] C:\Users\User\.gradle\caches\8.9\transforms\6b757ebe0b274a9979c85960ffee1983\transformed\sqlite-framework-2.4.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.sqlite:sqlite-framework:2.4.0] C:\Users\User\.gradle\caches\8.9\transforms\6b757ebe0b274a9979c85960ffee1983\transformed\sqlite-framework-2.4.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.sqlite:sqlite:2.4.0] C:\Users\User\.gradle\caches\8.9\transforms\51e046ff7f9394f1f25f5dd7e35a224e\transformed\sqlite-2.4.0\AndroidManifest.xml:20:5-44
@@ -333,10 +340,10 @@ MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\User\.g
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\User\.gradle\caches\8.9\transforms\dec7cf39a7799574d4df9aa5a52faf2f\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\User\.gradle\caches\8.9\transforms\36a43a85f3d4d93f507d530651cf67d5\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\User\.gradle\caches\8.9\transforms\36a43a85f3d4d93f507d530651cf67d5\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\482d48cbf743c9b7a144beff97fd5117\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\482d48cbf743c9b7a144beff97fd5117\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\User\.gradle\caches\8.9\transforms\9f6111612c2dba1a717c887cf3d807eb\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\User\.gradle\caches\8.9\transforms\9f6111612c2dba1a717c887cf3d807eb\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\482d48cbf743c9b7a144beff97fd5117\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\482d48cbf743c9b7a144beff97fd5117\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\User\.gradle\caches\8.9\transforms\f2804292926d109d76eb5413fc24f9d8\transformed\profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\User\.gradle\caches\8.9\transforms\f2804292926d109d76eb5413fc24f9d8\transformed\profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\User\.gradle\caches\8.9\transforms\02fa3256e554b622bfee9256d9f82de5\transformed\startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41

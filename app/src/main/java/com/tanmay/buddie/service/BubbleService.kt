@@ -77,9 +77,11 @@ import com.tanmay.buddie.presentation.components.mascot.SelectedCompanionMascot
 import com.tanmay.buddie.data.datastore.BubbleEdge
 import com.tanmay.buddie.data.datastore.UserPreferences
 import com.tanmay.buddie.domain.repository.ExamRepository
+import com.tanmay.buddie.domain.repository.FilterCodeRepository
 import com.tanmay.buddie.domain.repository.SubjectRepository
 import com.tanmay.buddie.domain.repository.SubmissionRepository
 import com.tanmay.buddie.domain.repository.TimetableRepository
+import com.tanmay.buddie.domain.sync.MoodleContentSyncEngine
 import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase
 import com.tanmay.buddie.presentation.components.mascot.MascotMood
 import com.tanmay.buddie.presentation.components.mascot.card.MascotCardContainer
@@ -118,6 +120,12 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
     @Inject
     lateinit var examRepository: ExamRepository
 
+    @Inject
+    lateinit var filterCodeRepository: FilterCodeRepository
+
+    @Inject
+    lateinit var syncEngine: MoodleContentSyncEngine
+
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
     private val _viewModelStore = ViewModelStore()
@@ -138,7 +146,15 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return when {
                     modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-                        HomeViewModel(submissionRepository, subjectRepository, examRepository, getMascotMoodUseCase, userPreferences) as T
+                        HomeViewModel(
+                            submissionRepository,
+                            subjectRepository,
+                            examRepository,
+                            getMascotMoodUseCase,
+                            userPreferences,
+                            filterCodeRepository,
+                            syncEngine
+                        ) as T
                     modelClass.isAssignableFrom(TimetableViewModel::class.java) ->
                         TimetableViewModel(timetableRepository, subjectRepository) as T
                     modelClass.isAssignableFrom(ExamsViewModel::class.java) ->

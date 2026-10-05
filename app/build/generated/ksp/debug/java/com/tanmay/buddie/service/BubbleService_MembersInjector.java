@@ -2,9 +2,11 @@ package com.tanmay.buddie.service;
 
 import com.tanmay.buddie.data.datastore.UserPreferences;
 import com.tanmay.buddie.domain.repository.ExamRepository;
+import com.tanmay.buddie.domain.repository.FilterCodeRepository;
 import com.tanmay.buddie.domain.repository.SubjectRepository;
 import com.tanmay.buddie.domain.repository.SubmissionRepository;
 import com.tanmay.buddie.domain.repository.TimetableRepository;
+import com.tanmay.buddie.domain.sync.MoodleContentSyncEngine;
 import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase;
 import dagger.MembersInjector;
 import dagger.internal.DaggerGenerated;
@@ -38,18 +40,26 @@ public final class BubbleService_MembersInjector implements MembersInjector<Bubb
 
   private final Provider<ExamRepository> examRepositoryProvider;
 
+  private final Provider<FilterCodeRepository> filterCodeRepositoryProvider;
+
+  private final Provider<MoodleContentSyncEngine> syncEngineProvider;
+
   public BubbleService_MembersInjector(Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider,
       Provider<UserPreferences> userPreferencesProvider,
       Provider<SubmissionRepository> submissionRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
       Provider<TimetableRepository> timetableRepositoryProvider,
-      Provider<ExamRepository> examRepositoryProvider) {
+      Provider<ExamRepository> examRepositoryProvider,
+      Provider<FilterCodeRepository> filterCodeRepositoryProvider,
+      Provider<MoodleContentSyncEngine> syncEngineProvider) {
     this.getMascotMoodUseCaseProvider = getMascotMoodUseCaseProvider;
     this.userPreferencesProvider = userPreferencesProvider;
     this.submissionRepositoryProvider = submissionRepositoryProvider;
     this.subjectRepositoryProvider = subjectRepositoryProvider;
     this.timetableRepositoryProvider = timetableRepositoryProvider;
     this.examRepositoryProvider = examRepositoryProvider;
+    this.filterCodeRepositoryProvider = filterCodeRepositoryProvider;
+    this.syncEngineProvider = syncEngineProvider;
   }
 
   public static MembersInjector<BubbleService> create(
@@ -58,8 +68,10 @@ public final class BubbleService_MembersInjector implements MembersInjector<Bubb
       Provider<SubmissionRepository> submissionRepositoryProvider,
       Provider<SubjectRepository> subjectRepositoryProvider,
       Provider<TimetableRepository> timetableRepositoryProvider,
-      Provider<ExamRepository> examRepositoryProvider) {
-    return new BubbleService_MembersInjector(getMascotMoodUseCaseProvider, userPreferencesProvider, submissionRepositoryProvider, subjectRepositoryProvider, timetableRepositoryProvider, examRepositoryProvider);
+      Provider<ExamRepository> examRepositoryProvider,
+      Provider<FilterCodeRepository> filterCodeRepositoryProvider,
+      Provider<MoodleContentSyncEngine> syncEngineProvider) {
+    return new BubbleService_MembersInjector(getMascotMoodUseCaseProvider, userPreferencesProvider, submissionRepositoryProvider, subjectRepositoryProvider, timetableRepositoryProvider, examRepositoryProvider, filterCodeRepositoryProvider, syncEngineProvider);
   }
 
   @Override
@@ -70,6 +82,8 @@ public final class BubbleService_MembersInjector implements MembersInjector<Bubb
     injectSubjectRepository(instance, subjectRepositoryProvider.get());
     injectTimetableRepository(instance, timetableRepositoryProvider.get());
     injectExamRepository(instance, examRepositoryProvider.get());
+    injectFilterCodeRepository(instance, filterCodeRepositoryProvider.get());
+    injectSyncEngine(instance, syncEngineProvider.get());
   }
 
   @InjectedFieldSignature("com.tanmay.buddie.service.BubbleService.getMascotMoodUseCase")
@@ -105,5 +119,16 @@ public final class BubbleService_MembersInjector implements MembersInjector<Bubb
   @InjectedFieldSignature("com.tanmay.buddie.service.BubbleService.examRepository")
   public static void injectExamRepository(BubbleService instance, ExamRepository examRepository) {
     instance.examRepository = examRepository;
+  }
+
+  @InjectedFieldSignature("com.tanmay.buddie.service.BubbleService.filterCodeRepository")
+  public static void injectFilterCodeRepository(BubbleService instance,
+      FilterCodeRepository filterCodeRepository) {
+    instance.filterCodeRepository = filterCodeRepository;
+  }
+
+  @InjectedFieldSignature("com.tanmay.buddie.service.BubbleService.syncEngine")
+  public static void injectSyncEngine(BubbleService instance, MoodleContentSyncEngine syncEngine) {
+    instance.syncEngine = syncEngine;
   }
 }

@@ -8,16 +8,31 @@ import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import com.tanmay.buddie.data.datastore.UserPreferences;
 import com.tanmay.buddie.data.local.AppDatabase;
+import com.tanmay.buddie.data.local.dao.MoodleCourseContentCacheDao;
+import com.tanmay.buddie.data.local.dao.TokenSignatureDecisionDao;
+import com.tanmay.buddie.data.local.security.MoodleTokenStorage;
+import com.tanmay.buddie.data.remote.moodle.MoodleApiClient;
 import com.tanmay.buddie.di.AppModule;
 import com.tanmay.buddie.di.AppModule_ProvideAppDatabaseFactory;
 import com.tanmay.buddie.di.AppModule_ProvideExamRepositoryFactory;
+import com.tanmay.buddie.di.AppModule_ProvideFilterCodeRepositoryFactory;
+import com.tanmay.buddie.di.AppModule_ProvideMoodleCourseContentCacheDaoFactory;
+import com.tanmay.buddie.di.AppModule_ProvideMoodleCourseMappingRepositoryFactory;
+import com.tanmay.buddie.di.AppModule_ProvideOkHttpClientFactory;
 import com.tanmay.buddie.di.AppModule_ProvideSubjectRepositoryFactory;
 import com.tanmay.buddie.di.AppModule_ProvideSubmissionRepositoryFactory;
 import com.tanmay.buddie.di.AppModule_ProvideTimetableRepositoryFactory;
+import com.tanmay.buddie.di.AppModule_ProvideTokenSignatureDecisionDaoFactory;
+import com.tanmay.buddie.di.AppModule_ProvideTokenSignatureRepositoryFactory;
 import com.tanmay.buddie.domain.repository.ExamRepository;
+import com.tanmay.buddie.domain.repository.FilterCodeRepository;
+import com.tanmay.buddie.domain.repository.MoodleCourseMappingRepository;
 import com.tanmay.buddie.domain.repository.SubjectRepository;
 import com.tanmay.buddie.domain.repository.SubmissionRepository;
 import com.tanmay.buddie.domain.repository.TimetableRepository;
+import com.tanmay.buddie.domain.repository.TokenSignatureRepository;
+import com.tanmay.buddie.domain.sync.MoodleContentSyncEngine;
+import com.tanmay.buddie.domain.sync.MoodleMergeEngine;
 import com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase;
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel;
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel_HiltModules_KeyModule_ProvideFactory;
@@ -27,6 +42,16 @@ import com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionViewModel;
 import com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionViewModel_HiltModules_KeyModule_ProvideFactory;
 import com.tanmay.buddie.presentation.screens.home.HomeViewModel;
 import com.tanmay.buddie.presentation.screens.home.HomeViewModel_HiltModules_KeyModule_ProvideFactory;
+import com.tanmay.buddie.presentation.screens.moodle.ConnectMoodleViewModel;
+import com.tanmay.buddie.presentation.screens.moodle.ConnectMoodleViewModel_HiltModules_KeyModule_ProvideFactory;
+import com.tanmay.buddie.presentation.screens.moodle.CourseMappingViewModel;
+import com.tanmay.buddie.presentation.screens.moodle.CourseMappingViewModel_HiltModules_KeyModule_ProvideFactory;
+import com.tanmay.buddie.presentation.screens.moodle.FilterCodeViewModel;
+import com.tanmay.buddie.presentation.screens.moodle.FilterCodeViewModel_HiltModules_KeyModule_ProvideFactory;
+import com.tanmay.buddie.presentation.screens.moodle.SyncPreviewViewModel;
+import com.tanmay.buddie.presentation.screens.moodle.SyncPreviewViewModel_HiltModules_KeyModule_ProvideFactory;
+import com.tanmay.buddie.presentation.screens.moodle.TokenDecisionViewModel;
+import com.tanmay.buddie.presentation.screens.moodle.TokenDecisionViewModel_HiltModules_KeyModule_ProvideFactory;
 import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel;
 import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel_HiltModules_KeyModule_ProvideFactory;
 import com.tanmay.buddie.presentation.screens.settings.SettingsViewModel;
@@ -61,6 +86,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Generated;
 import javax.inject.Provider;
+import okhttp3.OkHttpClient;
 
 @DaggerGenerated
 @Generated(
@@ -403,7 +429,7 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     @Override
     public Set<String> getViewModelKeys() {
-      return SetBuilder.<String>newSetBuilder(7).add(AddEditExamViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(AddEditSubmissionViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(ExamsViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(HomeViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(SettingsViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(TimetableSetupViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(TimetableViewModel_HiltModules_KeyModule_ProvideFactory.provide()).build();
+      return SetBuilder.<String>newSetBuilder(12).add(AddEditExamViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(AddEditSubmissionViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(ConnectMoodleViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(CourseMappingViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(ExamsViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(FilterCodeViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(HomeViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(SettingsViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(SyncPreviewViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(TimetableSetupViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(TimetableViewModel_HiltModules_KeyModule_ProvideFactory.provide()).add(TokenDecisionViewModel_HiltModules_KeyModule_ProvideFactory.provide()).build();
     }
 
     @Override
@@ -442,15 +468,25 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     private Provider<AddEditSubmissionViewModel> addEditSubmissionViewModelProvider;
 
+    private Provider<ConnectMoodleViewModel> connectMoodleViewModelProvider;
+
+    private Provider<CourseMappingViewModel> courseMappingViewModelProvider;
+
     private Provider<ExamsViewModel> examsViewModelProvider;
+
+    private Provider<FilterCodeViewModel> filterCodeViewModelProvider;
 
     private Provider<HomeViewModel> homeViewModelProvider;
 
     private Provider<SettingsViewModel> settingsViewModelProvider;
 
+    private Provider<SyncPreviewViewModel> syncPreviewViewModelProvider;
+
     private Provider<TimetableSetupViewModel> timetableSetupViewModelProvider;
 
     private Provider<TimetableViewModel> timetableViewModelProvider;
+
+    private Provider<TokenDecisionViewModel> tokenDecisionViewModelProvider;
 
     private ViewModelCImpl(SingletonCImpl singletonCImpl,
         ActivityRetainedCImpl activityRetainedCImpl, SavedStateHandle savedStateHandleParam,
@@ -467,16 +503,21 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
         final ViewModelLifecycle viewModelLifecycleParam) {
       this.addEditExamViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
       this.addEditSubmissionViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
-      this.examsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
-      this.homeViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
-      this.settingsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
-      this.timetableSetupViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
-      this.timetableViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
+      this.connectMoodleViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
+      this.courseMappingViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
+      this.examsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
+      this.filterCodeViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
+      this.homeViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
+      this.settingsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 7);
+      this.syncPreviewViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 8);
+      this.timetableSetupViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 9);
+      this.timetableViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 10);
+      this.tokenDecisionViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 11);
     }
 
     @Override
     public Map<String, Provider<ViewModel>> getHiltViewModelMap() {
-      return MapBuilder.<String, Provider<ViewModel>>newMapBuilder(7).put("com.tanmay.buddie.presentation.screens.forms.AddEditExamViewModel", ((Provider) addEditExamViewModelProvider)).put("com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionViewModel", ((Provider) addEditSubmissionViewModelProvider)).put("com.tanmay.buddie.presentation.screens.exams.ExamsViewModel", ((Provider) examsViewModelProvider)).put("com.tanmay.buddie.presentation.screens.home.HomeViewModel", ((Provider) homeViewModelProvider)).put("com.tanmay.buddie.presentation.screens.settings.SettingsViewModel", ((Provider) settingsViewModelProvider)).put("com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel", ((Provider) timetableSetupViewModelProvider)).put("com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel", ((Provider) timetableViewModelProvider)).build();
+      return MapBuilder.<String, Provider<ViewModel>>newMapBuilder(12).put("com.tanmay.buddie.presentation.screens.forms.AddEditExamViewModel", ((Provider) addEditExamViewModelProvider)).put("com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionViewModel", ((Provider) addEditSubmissionViewModelProvider)).put("com.tanmay.buddie.presentation.screens.moodle.ConnectMoodleViewModel", ((Provider) connectMoodleViewModelProvider)).put("com.tanmay.buddie.presentation.screens.moodle.CourseMappingViewModel", ((Provider) courseMappingViewModelProvider)).put("com.tanmay.buddie.presentation.screens.exams.ExamsViewModel", ((Provider) examsViewModelProvider)).put("com.tanmay.buddie.presentation.screens.moodle.FilterCodeViewModel", ((Provider) filterCodeViewModelProvider)).put("com.tanmay.buddie.presentation.screens.home.HomeViewModel", ((Provider) homeViewModelProvider)).put("com.tanmay.buddie.presentation.screens.settings.SettingsViewModel", ((Provider) settingsViewModelProvider)).put("com.tanmay.buddie.presentation.screens.moodle.SyncPreviewViewModel", ((Provider) syncPreviewViewModelProvider)).put("com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel", ((Provider) timetableSetupViewModelProvider)).put("com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel", ((Provider) timetableViewModelProvider)).put("com.tanmay.buddie.presentation.screens.moodle.TokenDecisionViewModel", ((Provider) tokenDecisionViewModelProvider)).build();
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -506,20 +547,35 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
           case 1: // com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionViewModel 
           return (T) new AddEditSubmissionViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), viewModelCImpl.savedStateHandle);
 
-          case 2: // com.tanmay.buddie.presentation.screens.exams.ExamsViewModel 
+          case 2: // com.tanmay.buddie.presentation.screens.moodle.ConnectMoodleViewModel 
+          return (T) new ConnectMoodleViewModel(singletonCImpl.moodleApiClientProvider.get());
+
+          case 3: // com.tanmay.buddie.presentation.screens.moodle.CourseMappingViewModel 
+          return (T) new CourseMappingViewModel(singletonCImpl.moodleApiClientProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideMoodleCourseMappingRepositoryProvider.get(), singletonCImpl.provideSubmissionRepositoryProvider.get());
+
+          case 4: // com.tanmay.buddie.presentation.screens.exams.ExamsViewModel 
           return (T) new ExamsViewModel(singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get());
 
-          case 3: // com.tanmay.buddie.presentation.screens.home.HomeViewModel 
-          return (T) new HomeViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get());
+          case 5: // com.tanmay.buddie.presentation.screens.moodle.FilterCodeViewModel 
+          return (T) new FilterCodeViewModel(singletonCImpl.provideFilterCodeRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideMoodleCourseMappingRepositoryProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get(), viewModelCImpl.savedStateHandle);
 
-          case 4: // com.tanmay.buddie.presentation.screens.settings.SettingsViewModel 
-          return (T) new SettingsViewModel(singletonCImpl.userPreferencesProvider.get());
+          case 6: // com.tanmay.buddie.presentation.screens.home.HomeViewModel 
+          return (T) new HomeViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get(), singletonCImpl.provideFilterCodeRepositoryProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get());
 
-          case 5: // com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel 
+          case 7: // com.tanmay.buddie.presentation.screens.settings.SettingsViewModel 
+          return (T) new SettingsViewModel(singletonCImpl.userPreferencesProvider.get(), singletonCImpl.moodleApiClientProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get());
+
+          case 8: // com.tanmay.buddie.presentation.screens.moodle.SyncPreviewViewModel 
+          return (T) new SyncPreviewViewModel(singletonCImpl.moodleContentSyncEngineProvider.get());
+
+          case 9: // com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel 
           return (T) new TimetableSetupViewModel(singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideTimetableRepositoryProvider.get());
 
-          case 6: // com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel 
+          case 10: // com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel 
           return (T) new TimetableViewModel(singletonCImpl.provideTimetableRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get());
+
+          case 11: // com.tanmay.buddie.presentation.screens.moodle.TokenDecisionViewModel 
+          return (T) new TokenDecisionViewModel(singletonCImpl.provideTokenSignatureRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideMoodleCourseMappingRepositoryProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get(), viewModelCImpl.savedStateHandle);
 
           default: throw new AssertionError(id);
         }
@@ -606,6 +662,8 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
       BubbleService_MembersInjector.injectSubjectRepository(instance, singletonCImpl.provideSubjectRepositoryProvider.get());
       BubbleService_MembersInjector.injectTimetableRepository(instance, singletonCImpl.provideTimetableRepositoryProvider.get());
       BubbleService_MembersInjector.injectExamRepository(instance, singletonCImpl.provideExamRepositoryProvider.get());
+      BubbleService_MembersInjector.injectFilterCodeRepository(instance, singletonCImpl.provideFilterCodeRepositoryProvider.get());
+      BubbleService_MembersInjector.injectSyncEngine(instance, singletonCImpl.moodleContentSyncEngineProvider.get());
       return instance;
     }
   }
@@ -615,19 +673,39 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     private final SingletonCImpl singletonCImpl = this;
 
+    private Provider<OkHttpClient> provideOkHttpClientProvider;
+
+    private Provider<MoodleTokenStorage> moodleTokenStorageProvider;
+
     private Provider<UserPreferences> userPreferencesProvider;
+
+    private Provider<MoodleApiClient> moodleApiClientProvider;
 
     private Provider<AppDatabase> provideAppDatabaseProvider;
 
+    private Provider<MoodleCourseMappingRepository> provideMoodleCourseMappingRepositoryProvider;
+
     private Provider<SubjectRepository> provideSubjectRepositoryProvider;
+
+    private Provider<MoodleCourseContentCacheDao> provideMoodleCourseContentCacheDaoProvider;
+
+    private Provider<TokenSignatureDecisionDao> provideTokenSignatureDecisionDaoProvider;
+
+    private Provider<TokenSignatureRepository> provideTokenSignatureRepositoryProvider;
+
+    private Provider<SubmissionRepository> provideSubmissionRepositoryProvider;
+
+    private Provider<MoodleMergeEngine> moodleMergeEngineProvider;
+
+    private Provider<MoodleContentSyncEngine> moodleContentSyncEngineProvider;
 
     private Provider<TimetableRepository> provideTimetableRepositoryProvider;
 
     private Provider<ExamRepository> provideExamRepositoryProvider;
 
-    private Provider<SubmissionRepository> provideSubmissionRepositoryProvider;
-
     private Provider<GetMascotMoodUseCase> getMascotMoodUseCaseProvider;
+
+    private Provider<FilterCodeRepository> provideFilterCodeRepositoryProvider;
 
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
@@ -637,17 +715,37 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
 
     @SuppressWarnings("unchecked")
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
-      this.userPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<UserPreferences>(singletonCImpl, 0));
-      this.provideAppDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 2));
-      this.provideSubjectRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubjectRepository>(singletonCImpl, 1));
-      this.provideTimetableRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<TimetableRepository>(singletonCImpl, 3));
-      this.provideExamRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<ExamRepository>(singletonCImpl, 4));
-      this.provideSubmissionRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubmissionRepository>(singletonCImpl, 5));
-      this.getMascotMoodUseCaseProvider = DoubleCheck.provider(new SwitchingProvider<GetMascotMoodUseCase>(singletonCImpl, 6));
+      this.provideOkHttpClientProvider = DoubleCheck.provider(new SwitchingProvider<OkHttpClient>(singletonCImpl, 2));
+      this.moodleTokenStorageProvider = DoubleCheck.provider(new SwitchingProvider<MoodleTokenStorage>(singletonCImpl, 3));
+      this.userPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<UserPreferences>(singletonCImpl, 4));
+      this.moodleApiClientProvider = DoubleCheck.provider(new SwitchingProvider<MoodleApiClient>(singletonCImpl, 1));
+      this.provideAppDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 6));
+      this.provideMoodleCourseMappingRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<MoodleCourseMappingRepository>(singletonCImpl, 5));
+      this.provideSubjectRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubjectRepository>(singletonCImpl, 7));
+      this.provideMoodleCourseContentCacheDaoProvider = DoubleCheck.provider(new SwitchingProvider<MoodleCourseContentCacheDao>(singletonCImpl, 8));
+      this.provideTokenSignatureDecisionDaoProvider = DoubleCheck.provider(new SwitchingProvider<TokenSignatureDecisionDao>(singletonCImpl, 10));
+      this.provideTokenSignatureRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<TokenSignatureRepository>(singletonCImpl, 9));
+      this.provideSubmissionRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SubmissionRepository>(singletonCImpl, 12));
+      this.moodleMergeEngineProvider = DoubleCheck.provider(new SwitchingProvider<MoodleMergeEngine>(singletonCImpl, 11));
+      this.moodleContentSyncEngineProvider = DoubleCheck.provider(new SwitchingProvider<MoodleContentSyncEngine>(singletonCImpl, 0));
+      this.provideTimetableRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<TimetableRepository>(singletonCImpl, 13));
+      this.provideExamRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<ExamRepository>(singletonCImpl, 14));
+      this.getMascotMoodUseCaseProvider = DoubleCheck.provider(new SwitchingProvider<GetMascotMoodUseCase>(singletonCImpl, 15));
+      this.provideFilterCodeRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<FilterCodeRepository>(singletonCImpl, 16));
     }
 
     @Override
     public void injectBuddieApp(BuddieApp buddieApp) {
+    }
+
+    @Override
+    public MoodleContentSyncEngine syncEngine() {
+      return moodleContentSyncEngineProvider.get();
+    }
+
+    @Override
+    public MoodleTokenStorage tokenStorage() {
+      return moodleTokenStorageProvider.get();
     }
 
     @Override
@@ -684,26 +782,56 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
       @Override
       public T get() {
         switch (id) {
-          case 0: // com.tanmay.buddie.data.datastore.UserPreferences 
+          case 0: // com.tanmay.buddie.domain.sync.MoodleContentSyncEngine 
+          return (T) new MoodleContentSyncEngine(singletonCImpl.moodleApiClientProvider.get(), singletonCImpl.provideMoodleCourseMappingRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideMoodleCourseContentCacheDaoProvider.get(), singletonCImpl.provideTokenSignatureRepositoryProvider.get(), singletonCImpl.moodleMergeEngineProvider.get());
+
+          case 1: // com.tanmay.buddie.data.remote.moodle.MoodleApiClient 
+          return (T) new MoodleApiClient(singletonCImpl.provideOkHttpClientProvider.get(), singletonCImpl.moodleTokenStorageProvider.get(), singletonCImpl.userPreferencesProvider.get());
+
+          case 2: // okhttp3.OkHttpClient 
+          return (T) AppModule_ProvideOkHttpClientFactory.provideOkHttpClient();
+
+          case 3: // com.tanmay.buddie.data.local.security.MoodleTokenStorage 
+          return (T) new MoodleTokenStorage(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 4: // com.tanmay.buddie.data.datastore.UserPreferences 
           return (T) new UserPreferences(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 1: // com.tanmay.buddie.domain.repository.SubjectRepository 
-          return (T) AppModule_ProvideSubjectRepositoryFactory.provideSubjectRepository(singletonCImpl.provideAppDatabaseProvider.get());
+          case 5: // com.tanmay.buddie.domain.repository.MoodleCourseMappingRepository 
+          return (T) AppModule_ProvideMoodleCourseMappingRepositoryFactory.provideMoodleCourseMappingRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
-          case 2: // com.tanmay.buddie.data.local.AppDatabase 
+          case 6: // com.tanmay.buddie.data.local.AppDatabase 
           return (T) AppModule_ProvideAppDatabaseFactory.provideAppDatabase(ApplicationContextModule_ProvideApplicationFactory.provideApplication(singletonCImpl.applicationContextModule));
 
-          case 3: // com.tanmay.buddie.domain.repository.TimetableRepository 
-          return (T) AppModule_ProvideTimetableRepositoryFactory.provideTimetableRepository(singletonCImpl.provideAppDatabaseProvider.get());
+          case 7: // com.tanmay.buddie.domain.repository.SubjectRepository 
+          return (T) AppModule_ProvideSubjectRepositoryFactory.provideSubjectRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
-          case 4: // com.tanmay.buddie.domain.repository.ExamRepository 
-          return (T) AppModule_ProvideExamRepositoryFactory.provideExamRepository(singletonCImpl.provideAppDatabaseProvider.get());
+          case 8: // com.tanmay.buddie.data.local.dao.MoodleCourseContentCacheDao 
+          return (T) AppModule_ProvideMoodleCourseContentCacheDaoFactory.provideMoodleCourseContentCacheDao(singletonCImpl.provideAppDatabaseProvider.get());
 
-          case 5: // com.tanmay.buddie.domain.repository.SubmissionRepository 
+          case 9: // com.tanmay.buddie.domain.repository.TokenSignatureRepository 
+          return (T) AppModule_ProvideTokenSignatureRepositoryFactory.provideTokenSignatureRepository(singletonCImpl.provideTokenSignatureDecisionDaoProvider.get());
+
+          case 10: // com.tanmay.buddie.data.local.dao.TokenSignatureDecisionDao 
+          return (T) AppModule_ProvideTokenSignatureDecisionDaoFactory.provideTokenSignatureDecisionDao(singletonCImpl.provideAppDatabaseProvider.get());
+
+          case 11: // com.tanmay.buddie.domain.sync.MoodleMergeEngine 
+          return (T) new MoodleMergeEngine(singletonCImpl.provideSubmissionRepositoryProvider.get());
+
+          case 12: // com.tanmay.buddie.domain.repository.SubmissionRepository 
           return (T) AppModule_ProvideSubmissionRepositoryFactory.provideSubmissionRepository(singletonCImpl.provideAppDatabaseProvider.get());
 
-          case 6: // com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase 
+          case 13: // com.tanmay.buddie.domain.repository.TimetableRepository 
+          return (T) AppModule_ProvideTimetableRepositoryFactory.provideTimetableRepository(singletonCImpl.provideAppDatabaseProvider.get());
+
+          case 14: // com.tanmay.buddie.domain.repository.ExamRepository 
+          return (T) AppModule_ProvideExamRepositoryFactory.provideExamRepository(singletonCImpl.provideAppDatabaseProvider.get());
+
+          case 15: // com.tanmay.buddie.domain.usecase.GetMascotMoodUseCase 
           return (T) new GetMascotMoodUseCase(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get());
+
+          case 16: // com.tanmay.buddie.domain.repository.FilterCodeRepository 
+          return (T) AppModule_ProvideFilterCodeRepositoryFactory.provideFilterCodeRepository(singletonCImpl.provideTokenSignatureDecisionDaoProvider.get());
 
           default: throw new AssertionError(id);
         }

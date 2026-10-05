@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.BootRestartConditionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-19T06:27:09" hostname="LAPTOP-0JF3IUAT" time="0.0">
+<testsuite name="com.tanmay.buddie.BootRestartConditionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.0">
   <properties/>
   <testcase name="shouldNotRestart_whenBothPermissionMissingAndBubbleDisabled" classname="com.tanmay.buddie.BootRestartConditionTest" time="0.0"/>
   <testcase name="shouldNotRestart_whenBubbleDisabledEvenIfPermissionGranted" classname="com.tanmay.buddie.BootRestartConditionTest" time="0.0"/>

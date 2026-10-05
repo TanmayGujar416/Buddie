@@ -157,7 +157,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     containerColor = CharcoalBackground,
                     bottomBar = {
-                        val hideBottomBar = currentRoute == "onboarding" || currentRoute?.startsWith("add_edit") == true
+                        val hideBottomBar = currentRoute == "onboarding" || currentRoute?.startsWith("add_edit") == true || currentRoute == "connect_moodle" || currentRoute == "map_courses" || currentRoute == "sync_preview" || currentRoute?.startsWith("filter_codes") == true
                         if (!hideBottomBar) {
                             NavigationBar(
                                 containerColor = CharcoalBackground,
@@ -262,7 +262,112 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("settings") {
                                 SettingsScreen(
-                                    onEditTimetableClick = { navController.navigate("onboarding") }
+                                    onEditTimetableClick = { navController.navigate("onboarding") },
+                                    onConnectMoodleClick = { navController.navigate("connect_moodle") },
+                                    onMapCoursesClick = { navController.navigate("map_courses") },
+                                    onFilterCodesClick = { navController.navigate("filter_codes") },
+                                    onSyncPreviewClick = { navController.navigate("sync_preview") }
+                                )
+                            }
+                            composable(
+                                "connect_moodle",
+                                enterTransition = {
+                                    slideInVertically(initialOffsetY = { 80 }, animationSpec = tween(240)) + fadeIn(tween(240))
+                                },
+                                exitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                },
+                                popEnterTransition = {
+                                    fadeIn(tween(200))
+                                },
+                                popExitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                }
+                            ) {
+                                com.tanmay.buddie.presentation.screens.moodle.ConnectMoodleScreen(
+                                    onNavigateBack = {
+                                        if (!navController.popBackStack()) {
+                                            navigateToTab("settings")
+                                        }
+                                    },
+                                    onConnectSuccess = {
+                                        navController.navigate("map_courses") {
+                                            popUpTo("connect_moodle") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+                            composable(
+                                "map_courses",
+                                enterTransition = {
+                                    slideInVertically(initialOffsetY = { 80 }, animationSpec = tween(240)) + fadeIn(tween(240))
+                                },
+                                exitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                },
+                                popEnterTransition = {
+                                    fadeIn(tween(200))
+                                },
+                                popExitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                }
+                            ) {
+                                com.tanmay.buddie.presentation.screens.moodle.CourseMappingScreen(
+                                    onNavigateBack = {
+                                        if (!navController.popBackStack()) {
+                                            navigateToTab("settings")
+                                        }
+                                    }
+                                )
+                            }
+                            composable(
+                                "sync_preview",
+                                enterTransition = {
+                                    slideInVertically(initialOffsetY = { 80 }, animationSpec = tween(240)) + fadeIn(tween(240))
+                                },
+                                exitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                },
+                                popEnterTransition = {
+                                    fadeIn(tween(200))
+                                },
+                                popExitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                }
+                            ) {
+                                com.tanmay.buddie.presentation.screens.moodle.SyncPreviewScreen(
+                                    onNavigateBack = {
+                                        if (!navController.popBackStack()) {
+                                            navigateToTab("settings")
+                                        }
+                                    }
+                                )
+                            }
+                            composable(
+                                "filter_codes?subjectId={subjectId}",
+                                arguments = listOf(androidx.navigation.navArgument("subjectId") {
+                                    nullable = true
+                                    defaultValue = null
+                                }),
+                                enterTransition = {
+                                    slideInVertically(initialOffsetY = { 80 }, animationSpec = tween(240)) + fadeIn(tween(240))
+                                },
+                                exitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                },
+                                popEnterTransition = {
+                                    fadeIn(tween(200))
+                                },
+                                popExitTransition = {
+                                    slideOutVertically(targetOffsetY = { 80 }, animationSpec = tween(180)) + fadeOut(tween(180))
+                                }
+                            ) {
+                                com.tanmay.buddie.presentation.screens.moodle.FilterCodeScreen(
+                                    onNavigateBack = {
+                                        if (!navController.popBackStack()) {
+                                            navigateToTab("settings")
+                                        }
+                                    }
                                 )
                             }
                             composable(

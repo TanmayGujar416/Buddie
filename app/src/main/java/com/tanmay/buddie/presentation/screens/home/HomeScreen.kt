@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,8 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tanmay.buddie.data.local.entity.SubmissionEntity
+import com.tanmay.buddie.data.local.entity.SubmissionSource
 import com.tanmay.buddie.presentation.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,6 +50,10 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val completingIds = remember { mutableStateListOf<String>() }
     val haptics = rememberAppHaptics()
+
+    LaunchedEffect(Unit) {
+        viewModel.syncMoodleOnOpen()
+    }
 
     Scaffold(
         containerColor = CharcoalBackground,
@@ -177,6 +185,25 @@ fun HomeScreen(
                                             }
                                         }
                                     },
+                                    onHide = { sub ->
+                                        haptics.performShortHaptic()
+                                        scope.launch {
+                                            completingIds.add(sub.id)
+                                            delay(260)
+                                            viewModel.hideMoodleSubmission(sub)
+                                            completingIds.remove(sub.id)
+
+                                            snackbarHostState.currentSnackbarData?.dismiss()
+                                            val result = snackbarHostState.showSnackbar(
+                                                message = "\"${sub.title}\" hidden (not mine)",
+                                                actionLabel = "Undo",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                viewModel.unhideMoodleSubmission(sub)
+                                            }
+                                        }
+                                    },
                                     onClick = { onEditSubmissionClick(it.id) }
                                 )
                             }
@@ -193,6 +220,7 @@ fun SubmissionCard(
     item: SubmissionWithSubject,
     onMarkDone: (SubmissionEntity) -> Unit,
     onDelete: (SubmissionEntity) -> Unit,
+    onHide: ((SubmissionEntity) -> Unit)? = null,
     onClick: (SubmissionEntity) -> Unit
 ) {
     val sub = item.submission
@@ -225,7 +253,11 @@ fun SubmissionCard(
             Spacer(modifier = Modifier.width(14.dp))
 
             // Text Details
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
                 Text(
                     text = sub.title,
                     fontWeight = FontWeight.Bold,
@@ -252,24 +284,61 @@ fun SubmissionCard(
                         color = TextMuted
                     )
                 }
+
+                if (sub.moodleVanished) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(StatusWarning.copy(alpha = 0.15f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "⚠️ Vanished from Moodle",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = StatusWarning,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
             }
 
-            // Action Buttons: Delete & Mark Done (48dp accessible touch target)
+            // Action Buttons (Option A):
+            // Exactly 2 buttons per card to keep layout clean and text readable:
+            // - Moodle assignments: Hide ("Not my batch", sets isMine=false) + Mark Done
+            // - Manual assignments: Delete + Mark Done
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = { onDelete(sub) },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Submission",
-                        tint = TextMuted,
-                        modifier = Modifier.size(20.dp)
-                    )
+                if (sub.source == SubmissionSource.MOODLE) {
+                    if (onHide != null) {
+                        IconButton(
+                            onClick = { onHide(sub) },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Not my batch (Hide)",
+                                tint = TextMuted,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(
+                        onClick = { onDelete(sub) },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Submission",
+                            tint = TextMuted,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
                 IconButton(
                     onClick = { onMarkDone(sub) },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,

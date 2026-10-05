@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.tanmay.buddie.MoodleSyncEngineTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.03">
+  <properties/>
+  <testcase name="mergeEngine_vanishedItemReappearing_clearsVanishedFlag" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.002"/>
+  <testcase name="getCourseContents_parsesSectionsAndModulesSuccessfully" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.004"/>
+  <testcase name="mergeEngine_itemMissingFromSync_markedVanished" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.001"/>
+  <testcase name="syncEngine_zeroDueDate_mapsToNull" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.005"/>
+  <testcase name="calibrate_deduplicatesItemsToUniqueTokenSets" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.001"/>
+  <testcase name="syncPreview_expandedSubjectIds_togglesIndependently" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.0"/>
+  <testcase name="mergeEngine_manualSubmissions_neverModifiedOrVanished" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.001"/>
+  <testcase name="applyDecisions_tokenDetected_excludeDecision_filteredOut" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.0"/>
+  <testcase name="applyDecisions_tokenDetected_noDecision_markedNeedsReview" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.0"/>
+  <testcase name="demappingCourse_deletesAssociatedMoodleSubmissionsOnly" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.001"/>
+  <testcase name="syncEngine_cacheOver24h_fetchesFreshAndUpdatesCache" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.002"/>
+  <testcase name="tokenScanner_extractsRecurringTokens_filtersOutSingleOccurrencesAndStopWords" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.003"/>
+  <testcase name="applyDecisions_tokenDetected_includeDecision_kept" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.0"/>
+  <testcase name="applyDecisions_noTokensDetected_alwaysIncluded" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.0"/>
+  <testcase name="syncEngine_correlatesByCmidAndSkipsIgnoredCourses" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.003"/>
+  <testcase name="mergeEngine_insertsNewMoodleSubmission_withNotStartedStatus" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.001"/>
+  <testcase name="getAssignments_parsesDueDatesAndCmidsSuccessfully" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.002"/>
+  <testcase name="mergeEngine_updatesExistingMoodleSubmission_preservesUserStatus" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.001"/>
+  <testcase name="computeSignature_sortsAndUppercasesTokensDeterministically" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.0"/>
+  <testcase name="syncEngine_cacheUnder24h_usesCachedSectionsWithoutCallingApi" classname="com.tanmay.buddie.MoodleSyncEngineTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

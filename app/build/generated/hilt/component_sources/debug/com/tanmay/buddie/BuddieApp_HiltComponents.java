@@ -1,10 +1,16 @@
 package com.tanmay.buddie;
 
 import com.tanmay.buddie.di.AppModule;
+import com.tanmay.buddie.domain.sync.MoodleSyncWorker;
 import com.tanmay.buddie.presentation.screens.exams.ExamsViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.forms.AddEditExamViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.forms.AddEditSubmissionViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.home.HomeViewModel_HiltModules;
+import com.tanmay.buddie.presentation.screens.moodle.ConnectMoodleViewModel_HiltModules;
+import com.tanmay.buddie.presentation.screens.moodle.CourseMappingViewModel_HiltModules;
+import com.tanmay.buddie.presentation.screens.moodle.FilterCodeViewModel_HiltModules;
+import com.tanmay.buddie.presentation.screens.moodle.SyncPreviewViewModel_HiltModules;
+import com.tanmay.buddie.presentation.screens.moodle.TokenDecisionViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.onboarding.TimetableSetupViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.settings.SettingsViewModel_HiltModules;
 import com.tanmay.buddie.presentation.screens.timetable.TimetableViewModel_HiltModules;
@@ -142,6 +148,7 @@ public final class BuddieApp_HiltComponents {
   )
   @Singleton
   public abstract static class SingletonC implements BuddieApp_GeneratedInjector,
+      MoodleSyncWorker.MoodleSyncWorkerEntryPoint,
       BootReceiver.BootReceiverEntryPoint,
       FragmentGetContextFix.FragmentGetContextFixEntryPoint,
       HiltWrapper_ActivityRetainedComponentManager_ActivityRetainedComponentBuilderEntryPoint,
@@ -166,12 +173,17 @@ public final class BuddieApp_HiltComponents {
           AddEditSubmissionViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class,
+          ConnectMoodleViewModel_HiltModules.KeyModule.class,
+          CourseMappingViewModel_HiltModules.KeyModule.class,
           ExamsViewModel_HiltModules.KeyModule.class,
+          FilterCodeViewModel_HiltModules.KeyModule.class,
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HomeViewModel_HiltModules.KeyModule.class,
           SettingsViewModel_HiltModules.KeyModule.class,
+          SyncPreviewViewModel_HiltModules.KeyModule.class,
           TimetableSetupViewModel_HiltModules.KeyModule.class,
-          TimetableViewModel_HiltModules.KeyModule.class
+          TimetableViewModel_HiltModules.KeyModule.class,
+          TokenDecisionViewModel_HiltModules.KeyModule.class
       }
   )
   @ActivityRetainedScoped
@@ -209,12 +221,17 @@ public final class BuddieApp_HiltComponents {
       modules = {
           AddEditExamViewModel_HiltModules.BindsModule.class,
           AddEditSubmissionViewModel_HiltModules.BindsModule.class,
+          ConnectMoodleViewModel_HiltModules.BindsModule.class,
+          CourseMappingViewModel_HiltModules.BindsModule.class,
           ExamsViewModel_HiltModules.BindsModule.class,
+          FilterCodeViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
           HomeViewModel_HiltModules.BindsModule.class,
           SettingsViewModel_HiltModules.BindsModule.class,
+          SyncPreviewViewModel_HiltModules.BindsModule.class,
           TimetableSetupViewModel_HiltModules.BindsModule.class,
-          TimetableViewModel_HiltModules.BindsModule.class
+          TimetableViewModel_HiltModules.BindsModule.class,
+          TokenDecisionViewModel_HiltModules.BindsModule.class
       }
   )
   @ViewModelScoped

@@ -108,7 +108,15 @@ class AddEditSubmissionViewModel @Inject constructor(
             } else {
                 val existing = submissionRepository.getSubmissionById(submissionId)
                 if (existing != null) {
-                    submissionRepository.updateSubmission(entity.copy(status = existing.status))
+                    submissionRepository.updateSubmission(
+                        entity.copy(
+                            status = existing.status,
+                            source = existing.source,
+                            moodleAssignmentId = existing.moodleAssignmentId,
+                            filteredOut = existing.filteredOut,
+                            moodleVanished = existing.moodleVanished
+                        )
+                    )
                 }
             }
             

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.GetMascotMoodUseCaseTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-19T06:27:09" hostname="LAPTOP-0JF3IUAT" time="0.377">
+<testsuite name="com.tanmay.buddie.GetMascotMoodUseCaseTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.341">
   <properties/>
-  <testcase name="testEmptyDataEmitsCalm" classname="com.tanmay.buddie.GetMascotMoodUseCaseTest" time="0.377"/>
+  <testcase name="testEmptyDataEmitsCalm" classname="com.tanmay.buddie.GetMascotMoodUseCaseTest" time="0.341"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

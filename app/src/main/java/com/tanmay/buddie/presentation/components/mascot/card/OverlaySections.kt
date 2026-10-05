@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tanmay.buddie.data.local.entity.ExamEntity
 import com.tanmay.buddie.data.local.entity.SubmissionEntity
+import com.tanmay.buddie.data.local.entity.SubmissionSource
 import com.tanmay.buddie.presentation.components.ExamListSkeleton
 import com.tanmay.buddie.presentation.components.SubmissionListSkeleton
 import com.tanmay.buddie.presentation.components.mascot.CompanionType
@@ -99,6 +101,7 @@ fun OverlaySubmissionCard(
     item: SubmissionWithSubject,
     onMarkDone: (SubmissionEntity) -> Unit,
     onDelete: (SubmissionEntity) -> Unit,
+    onHide: ((SubmissionEntity) -> Unit)? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -132,7 +135,11 @@ fun OverlaySubmissionCard(
             Spacer(modifier = Modifier.width(10.dp))
 
             // Text Details
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 6.dp)
+            ) {
                 Text(
                     text = sub.title,
                     fontWeight = FontWeight.SemiBold,
@@ -152,33 +159,58 @@ fun OverlaySubmissionCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (sub.moodleVanished) {
+                    Text(
+                        text = "⚠️ Vanished from Moodle",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = StatusWarning,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Action Buttons with generous 8dp spacing and full 48dp touch targets
+            // Action Buttons (Option A): Exactly 2 buttons per card
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                IconButton(
-                    onClick = { onDelete(sub) },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Assignment",
-                        tint = TextMuted,
-                        modifier = Modifier.size(18.dp)
-                    )
+                if (sub.source == SubmissionSource.MOODLE) {
+                    if (onHide != null) {
+                        IconButton(
+                            onClick = { onHide(sub) },
+                            modifier = Modifier.size(38.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Not my batch (Hide)",
+                                tint = TextMuted,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(
+                        onClick = { onDelete(sub) },
+                        modifier = Modifier.size(38.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Assignment",
+                            tint = TextMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
                 IconButton(
                     onClick = { onMarkDone(sub) },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(38.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Mark as Done",
+                        contentDescription = "Mark Assignment Done",
                         tint = AccentBlueLight,
                         modifier = Modifier.size(20.dp)
                     )
@@ -297,6 +329,10 @@ fun SubmissionsSection(
     val completingIds = remember { mutableStateListOf<String>() }
     val haptics = rememberAppHaptics()
 
+    LaunchedEffect(Unit) {
+        viewModel.syncMoodleOnOpen()
+    }
+
     Box(modifier = modifier.fillMaxWidth()) {
         when {
             uiState.isLoading -> {
@@ -343,6 +379,12 @@ fun SubmissionsSection(
                                         delay(220)
                                         viewModel.deleteSubmission(sub)
                                         completingIds.remove(sub.id)
+                                    }
+                                },
+                                onHide = { sub ->
+                                    haptics.performShortHaptic()
+                                    scope.launch {
+                                        viewModel.hideMoodleSubmission(sub)
                                     }
                                 },
                                 onClick = { onOpenApp() }

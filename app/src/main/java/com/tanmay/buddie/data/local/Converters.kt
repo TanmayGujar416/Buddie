@@ -1,4 +1,4 @@
-﻿package com.tanmay.buddie.data.local
+package com.tanmay.buddie.data.local
 
 import androidx.room.TypeConverter
 import com.tanmay.buddie.data.local.entity.SessionType
@@ -38,4 +38,18 @@ class Converters {
 
     @TypeConverter
     fun toSubmissionStatus(statusString: String?): SubmissionStatus? = statusString?.let { SubmissionStatus.valueOf(it) }
+
+    @TypeConverter
+    fun fromSubmissionSource(source: com.tanmay.buddie.data.local.entity.SubmissionSource?): String? = source?.name
+
+    @TypeConverter
+    fun toSubmissionSource(sourceString: String?): com.tanmay.buddie.data.local.entity.SubmissionSource? =
+        sourceString?.let { com.tanmay.buddie.data.local.entity.SubmissionSource.valueOf(it) }
+
+    @TypeConverter
+    fun fromSignatureDecision(decision: com.tanmay.buddie.data.local.entity.SignatureDecision?): String? = decision?.name
+
+    @TypeConverter
+    fun toSignatureDecision(decisionString: String?): com.tanmay.buddie.data.local.entity.SignatureDecision? =
+        decisionString?.let { com.tanmay.buddie.data.local.entity.SignatureDecision.valueOf(it) }
 }

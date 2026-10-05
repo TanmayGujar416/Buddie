@@ -1,4 +1,4 @@
-﻿package com.tanmay.buddie.data.local.dao
+package com.tanmay.buddie.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -20,9 +20,33 @@ interface SubmissionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubmission(submission: SubmissionEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubmissions(submissions: List<SubmissionEntity>)
+
     @Update
     suspend fun updateSubmission(submission: SubmissionEntity)
 
     @Delete
     suspend fun deleteSubmission(submission: SubmissionEntity)
+
+    @Query("SELECT * FROM submissions WHERE moodleAssignmentId = :cmid AND source = 'MOODLE' LIMIT 1")
+    suspend fun getSubmissionByMoodleId(cmid: Long): SubmissionEntity?
+
+    @Query("SELECT * FROM submissions WHERE source = 'MOODLE'")
+    suspend fun getAllMoodleSubmissions(): List<SubmissionEntity>
+
+    @Query("UPDATE submissions SET title = :title, deadline = :deadline, moodleCourseId = :courseId, filteredOut = :filteredOut, needsReview = :needsReview, moodleVanished = 0 WHERE id = :id")
+    suspend fun updateMoodleSubmission(id: String, title: String, deadline: java.time.LocalDateTime, courseId: Long, filteredOut: Boolean, needsReview: Boolean)
+
+    @Query("UPDATE submissions SET filteredOut = :filteredOut WHERE id = :id")
+    suspend fun updateFilteredOut(id: String, filteredOut: Boolean)
+
+    @Query("UPDATE submissions SET moodleVanished = 1 WHERE id = :id")
+    suspend fun markMoodleVanished(id: String)
+
+    @Query("DELETE FROM submissions WHERE source = 'MOODLE' AND moodleCourseId = :courseId")
+    suspend fun deleteMoodleSubmissionsByCourseId(courseId: Long): Int
+
+    @Query("DELETE FROM submissions WHERE source = 'MOODLE' AND subjectId = :subjectId")
+    suspend fun deleteMoodleSubmissionsBySubjectId(subjectId: String): Int
 }
