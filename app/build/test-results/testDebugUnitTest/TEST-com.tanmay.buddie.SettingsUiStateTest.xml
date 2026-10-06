@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.SettingsUiStateTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.0">
+<testsuite name="com.tanmay.buddie.SettingsUiStateTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-06T06:16:54" hostname="LAPTOP-0JF3IUAT" time="0.001">
   <properties/>
-  <testcase name="settingsUiState_withFloatingBubbleEnabled" classname="com.tanmay.buddie.SettingsUiStateTest" time="0.0"/>
+  <testcase name="settingsUiState_withFloatingBubbleEnabled" classname="com.tanmay.buddie.SettingsUiStateTest" time="0.001"/>
   <testcase name="defaultSettingsUiState_hasFloatingBubbleDisabled" classname="com.tanmay.buddie.SettingsUiStateTest" time="0.0"/>
   <testcase name="settingsUiState_withBatteryOptimizationDismissed" classname="com.tanmay.buddie.SettingsUiStateTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>

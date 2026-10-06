@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.CompanionUiStateTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.003">
+<testsuite name="com.tanmay.buddie.CompanionUiStateTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-06T06:16:53" hostname="LAPTOP-0JF3IUAT" time="0.003">
   <properties/>
-  <testcase name="testExamsUiState_defaultCompanionIsBuddie" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.001"/>
-  <testcase name="testExamsUiState_customCompanion" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.001"/>
+  <testcase name="testExamsUiState_defaultCompanionIsBuddie" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.002"/>
+  <testcase name="testExamsUiState_customCompanion" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.0"/>
   <testcase name="testCompanionTypeCloudAndGhostAliases" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.0"/>
-  <testcase name="testHomeUiState_customCompanion" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.0"/>
-  <testcase name="testCompanionTypeCatAlias" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.001"/>
+  <testcase name="testHomeUiState_customCompanion" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.001"/>
+  <testcase name="testCompanionTypeCatAlias" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.0"/>
   <testcase name="testHomeUiState_defaultCompanionIsBuddie" classname="com.tanmay.buddie.CompanionUiStateTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

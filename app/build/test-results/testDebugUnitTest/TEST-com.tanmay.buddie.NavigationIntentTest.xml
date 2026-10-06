@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.NavigationIntentTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.01">
+<testsuite name="com.tanmay.buddie.NavigationIntentTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-06T06:16:54" hostname="LAPTOP-0JF3IUAT" time="0.01">
   <properties/>
   <testcase name="doubleTapDetection_withinTimeout_detectsDoubleTap" classname="com.tanmay.buddie.NavigationIntentTest" time="0.0"/>
   <testcase name="startDestinationResolution_matchesOnboardingStatus" classname="com.tanmay.buddie.NavigationIntentTest" time="0.0"/>
   <testcase name="extraTargetTabConstants_matchBetweenMainActivityAndBubbleService" classname="com.tanmay.buddie.NavigationIntentTest" time="0.0"/>
-  <testcase name="cardSectionRoutes_mapToCorrectNavigationDestinations" classname="com.tanmay.buddie.NavigationIntentTest" time="0.009"/>
+  <testcase name="cardSectionRoutes_mapToCorrectNavigationDestinations" classname="com.tanmay.buddie.NavigationIntentTest" time="0.01"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

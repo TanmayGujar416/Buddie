@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.tanmay.buddie.app-mergeDebugResources-58:/values/values.xml",
+            "outputFile": "com.tanmay.buddie.app-mergeDebugResources-59:/values/values.xml",
             "map": [
                 {
                     "source": "D:\\Buddie\\app\\src\\main\\res\\values\\themes.xml",

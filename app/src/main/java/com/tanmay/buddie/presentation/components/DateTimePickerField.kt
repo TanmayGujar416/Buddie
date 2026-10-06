@@ -25,7 +25,7 @@ fun DateTimePickerField(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    val initialMillis = value.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    val initialMillis = value.toLocalDate().atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
     val timePickerState = rememberTimePickerState(initialHour = value.hour, initialMinute = value.minute)
 
@@ -99,7 +99,7 @@ fun DateTimePickerField(
                 TextButton(onClick = {
                     showTimePicker = false
                     val selectedMillis = datePickerState.selectedDateMillis ?: initialMillis
-                    val selectedDate = Instant.ofEpochMilli(selectedMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val selectedDate = Instant.ofEpochMilli(selectedMillis).atZone(ZoneId.of("UTC")).toLocalDate()
                     val newDateTime = selectedDate.atTime(timePickerState.hour, timePickerState.minute)
                     onValueChange(newDateTime)
                 }) {

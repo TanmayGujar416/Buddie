@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.FilterEngineTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.139">
+<testsuite name="com.tanmay.buddie.FilterEngineTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-06T06:16:53" hostname="LAPTOP-0JF3IUAT" time="0.16">
   <properties/>
-  <testcase name="tokenizer_dsExpDivCStyle" classname="com.tanmay.buddie.FilterEngineTest" time="0.012"/>
-  <testcase name="calibrationFlow_proposesCorrectCodesFromSmallLabeledYesNoSample" classname="com.tanmay.buddie.FilterEngineTest" time="0.001"/>
+  <testcase name="tokenizer_dsExpDivCStyle" classname="com.tanmay.buddie.FilterEngineTest" time="0.014"/>
+  <testcase name="calibrationFlow_proposesCorrectCodesFromSmallLabeledYesNoSample" classname="com.tanmay.buddie.FilterEngineTest" time="0.002"/>
   <testcase name="tokenizer_concatenatedFormats" classname="com.tanmay.buddie.FilterEngineTest" time="0.0"/>
   <testcase name="tokenizer_appliesToAncestorHeadingsAndTitleBlob" classname="com.tanmay.buddie.FilterEngineTest" time="0.001"/>
-  <testcase name="warningBadge_retargetedToUnresolvedItems" classname="com.tanmay.buddie.FilterEngineTest" time="0.001"/>
+  <testcase name="warningBadge_retargetedToUnresolvedItems" classname="com.tanmay.buddie.FilterEngineTest" time="0.002"/>
   <testcase name="tokenizer_reorderedFormats_produceIdenticalTokenSets" classname="com.tanmay.buddie.FilterEngineTest" time="0.0"/>
   <testcase name="detectionMode_zeroIsMineCodes_keepsEverything" classname="com.tanmay.buddie.FilterEngineTest" time="0.001"/>
   <testcase name="allowListMode_configuringOnlyOneIsMineCode_filtersSiblingBatchItems_keepsCourseWide" classname="com.tanmay.buddie.FilterEngineTest" time="0.001"/>
-  <testcase name="tokenizer_inconsistentSpacingFormats" classname="com.tanmay.buddie.FilterEngineTest" time="0.001"/>
-  <testcase name="hideUnhideRoundTrip_updatesFilteredOutWithZeroNetworkCalls" classname="com.tanmay.buddie.FilterEngineTest" time="0.119"/>
+  <testcase name="tokenizer_inconsistentSpacingFormats" classname="com.tanmay.buddie.FilterEngineTest" time="0.0"/>
+  <testcase name="hideUnhideRoundTrip_updatesFilteredOutWithZeroNetworkCalls" classname="com.tanmay.buddie.FilterEngineTest" time="0.137"/>
   <testcase name="tokenizer_hyphenatedFormat" classname="com.tanmay.buddie.FilterEngineTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

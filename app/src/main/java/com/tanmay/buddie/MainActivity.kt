@@ -242,13 +242,18 @@ class MainActivity : ComponentActivity() {
                                                 popUpTo("onboarding") { inclusive = true }
                                             }
                                         }
-                                    }
+                                    },
+                                    onBackClick = if (navController.previousBackStackEntry != null) {
+                                        { navController.popBackStack() }
+                                    } else null
                                 )
                             }
                             composable("home") {
                                 HomeScreen(
                                     onAddSubmissionClick = { navController.navigate("add_edit_submission") },
-                                    onEditSubmissionClick = { id -> navController.navigate("add_edit_submission?submissionId=$id") }
+                                    onEditSubmissionClick = { id -> navController.navigate("add_edit_submission?submissionId=$id") },
+                                    onNavigateToTimetable = { navigateToTab("timetable") },
+                                    onNavigateToExams = { navigateToTab("exams") }
                                 )
                             }
                             composable("timetable") {

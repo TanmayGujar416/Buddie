@@ -13,6 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import com.tanmay.buddie.domain.repository.TokenSignatureRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
@@ -30,6 +32,8 @@ open class MoodleContentSyncEngine @Inject constructor(
     companion object {
         const val CACHE_TTL_MILLIS = 24 * 60 * 60 * 1000L // 24 hours
     }
+
+    private val syncMutex = Mutex()
 
     @Volatile
     private var lastFetchedItems: List<FetchedMoodleItem>? = null
@@ -55,18 +59,20 @@ open class MoodleContentSyncEngine @Inject constructor(
     open suspend fun runFullSync(
         forceRefreshCourseStructure: Boolean = false
     ): Result<MergeResult> = withContext(Dispatchers.IO) {
-        val previewResult = fetchPreviewItems(forceRefreshCourseStructure)
-        if (previewResult.isFailure) {
-            return@withContext Result.failure(
-                previewResult.exceptionOrNull() ?: Exception("Failed to fetch Moodle items")
-            )
+        syncMutex.withLock {
+            val previewResult = fetchPreviewItems(forceRefreshCourseStructure)
+            if (previewResult.isFailure) {
+                return@withContext Result.failure(
+                    previewResult.exceptionOrNull() ?: Exception("Failed to fetch Moodle items")
+                )
+            }
+            val items = previewResult.getOrThrow()
+            val mergeResult = applyFiltersAndMerge(items)
+            if (mergeResult.isSuccess) {
+                lastSyncTimestampMillis = System.currentTimeMillis()
+            }
+            mergeResult
         }
-        val items = previewResult.getOrThrow()
-        val mergeResult = applyFiltersAndMerge(items)
-        if (mergeResult.isSuccess) {
-            lastSyncTimestampMillis = System.currentTimeMillis()
-        }
-        mergeResult
     }
 
     /**
@@ -147,6 +153,7 @@ open class MoodleContentSyncEngine @Inject constructor(
             val assignmentByCmid = assignments.associateBy { it.cmid }
 
             val resultItems = mutableListOf<FetchedMoodleItem>()
+            val globalAddedCmids = mutableSetOf<Long>()
 
             // 4. For each mapped course, retrieve contents (using 24h cache unless expired or forced)
             for (courseMapping in mappedCourses) {
@@ -163,7 +170,6 @@ open class MoodleContentSyncEngine @Inject constructor(
                 }
 
                 val sections = sectionsResult.getOrThrow()
-                val addedCmidsForCourse = mutableSetOf<Long>()
 
                 // Walk whatever structure core_course_get_contents returns and collect every heading
                 for (section in sections) {
@@ -175,6 +181,9 @@ open class MoodleContentSyncEngine @Inject constructor(
                         val correlatedAssignment = assignmentByCmid[module.id]
 
                         if (isAssignModule || correlatedAssignment != null) {
+                            if (module.id in globalAddedCmids) continue
+                            globalAddedCmids.add(module.id)
+
                             val title = correlatedAssignment?.name?.takeIf { it.isNotBlank() }
                                 ?: module.name.takeIf { it.isNotBlank() }
                                 ?: "Assignment"
@@ -194,7 +203,6 @@ open class MoodleContentSyncEngine @Inject constructor(
                                     ancestorHeadings = ancestorHeadings
                                 )
                             )
-                            addedCmidsForCourse.add(module.id)
                         }
                     }
                 }
@@ -202,9 +210,12 @@ open class MoodleContentSyncEngine @Inject constructor(
                 // Fallback: Check if there are assignments returned by mod_assign_get_assignments
                 // that were not referenced inside the course contents modules (e.g. special course formats)
                 val orphanAssignments = assignments.filter {
-                    it.courseId == courseId && it.cmid !in addedCmidsForCourse
+                    it.courseId == courseId && it.cmid !in globalAddedCmids
                 }
                 for (orphan in orphanAssignments) {
+                    if (orphan.cmid in globalAddedCmids) continue
+                    globalAddedCmids.add(orphan.cmid)
+
                     val dueDate = if (orphan.dueDate > 0L) orphan.dueDate else null
                     resultItems.add(
                         FetchedMoodleItem(

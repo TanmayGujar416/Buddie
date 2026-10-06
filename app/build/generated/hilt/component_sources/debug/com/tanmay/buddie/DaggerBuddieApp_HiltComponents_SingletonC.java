@@ -560,7 +560,7 @@ public final class DaggerBuddieApp_HiltComponents_SingletonC {
           return (T) new FilterCodeViewModel(singletonCImpl.provideFilterCodeRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideMoodleCourseMappingRepositoryProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get(), viewModelCImpl.savedStateHandle);
 
           case 6: // com.tanmay.buddie.presentation.screens.home.HomeViewModel 
-          return (T) new HomeViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get(), singletonCImpl.provideFilterCodeRepositoryProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get());
+          return (T) new HomeViewModel(singletonCImpl.provideSubmissionRepositoryProvider.get(), singletonCImpl.provideSubjectRepositoryProvider.get(), singletonCImpl.provideExamRepositoryProvider.get(), singletonCImpl.getMascotMoodUseCaseProvider.get(), singletonCImpl.userPreferencesProvider.get(), singletonCImpl.provideFilterCodeRepositoryProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get(), singletonCImpl.provideTimetableRepositoryProvider.get());
 
           case 7: // com.tanmay.buddie.presentation.screens.settings.SettingsViewModel 
           return (T) new SettingsViewModel(singletonCImpl.userPreferencesProvider.get(), singletonCImpl.moodleApiClientProvider.get(), singletonCImpl.moodleContentSyncEngineProvider.get());

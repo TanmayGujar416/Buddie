@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.MoodleConnectionTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.046">
+<testsuite name="com.tanmay.buddie.MoodleConnectionTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-06T06:16:54" hostname="LAPTOP-0JF3IUAT" time="0.042">
   <properties/>
-  <testcase name="authenticate_successfulToken_returnsSuccessAndSavesData" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.032"/>
-  <testcase name="disconnect_clearsTokenAndSiteUrl" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.002"/>
+  <testcase name="authenticate_successfulToken_returnsSuccessAndSavesData" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.031"/>
+  <testcase name="disconnect_clearsTokenAndSiteUrl" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.001"/>
   <testcase name="corruptedKeystoreRecovery_explicitlyResetsHasTokenFlowToFalse" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.0"/>
   <testcase name="urlNormalization_prependsHttpsAndStripsTrailingSlash" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.001"/>
-  <testcase name="settingsUiState_containsMoodleConnectionState" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.001"/>
-  <testcase name="authenticate_webServicesDisabled_returnsMoodleRealErrorMessage" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.005"/>
+  <testcase name="settingsUiState_containsMoodleConnectionState" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.0"/>
+  <testcase name="authenticate_webServicesDisabled_returnsMoodleRealErrorMessage" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.003"/>
   <testcase name="authenticate_invalidLogin_returnsMoodleRealErrorMessage" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.002"/>
   <testcase name="formBodyEncoding_preservesSpecialCharactersInPasswords" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.0"/>
   <testcase name="authenticate_validation_detectsEmptyFieldsWithoutNetwork" classname="com.tanmay.buddie.MoodleConnectionTest" time="0.002"/>

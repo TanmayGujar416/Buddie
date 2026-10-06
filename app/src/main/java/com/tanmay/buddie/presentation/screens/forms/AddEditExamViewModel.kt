@@ -96,33 +96,49 @@ class AddEditExamViewModel @Inject constructor(
         )
     }
 
+    fun createSubject(name: String, color: String) {
+        viewModelScope.launch {
+            val newSubject = SubjectEntity(
+                id = UUID.randomUUID().toString(),
+                name = name,
+                color = color
+            )
+            subjectRepository.insertSubject(newSubject)
+            _formState.value = _formState.value.copy(subjectId = newSubject.id)
+        }
+    }
+
     fun saveExam() {
         val state = _formState.value
-        if (state.title.isBlank() || state.subjectId == null || state.hall.isBlank()) return
+        if (state.title.isBlank() || state.subjectId == null || state.hall.isBlank() || state.isSaving || state.saveCompleted) return
         
+        _formState.value = state.copy(isSaving = true)
+
         viewModelScope.launch {
-            _formState.value = _formState.value.copy(isSaving = true)
-            
-            val entity = ExamEntity(
-                id = examId ?: UUID.randomUUID().toString(),
-                subjectId = state.subjectId,
-                title = state.title,
-                datetime = state.datetime,
-                durationMinutes = state.durationMinutes.toIntOrNull() ?: 120,
-                hall = state.hall,
-                seatNumber = state.seatNumber.takeIf { it.isNotBlank() },
-                syllabusScope = state.syllabusScope.takeIf { it.isNotBlank() },
-                allowedMaterials = state.allowedMaterials.takeIf { it.isNotBlank() },
-                roomOverride = state.roomOverride.takeIf { it.isNotBlank() }
-            )
-            
-            if (examId == null) {
-                examRepository.insertExam(entity)
-            } else {
-                examRepository.updateExam(entity)
+            try {
+                val entity = ExamEntity(
+                    id = examId ?: UUID.randomUUID().toString(),
+                    subjectId = state.subjectId,
+                    title = state.title.trim(),
+                    datetime = state.datetime,
+                    durationMinutes = state.durationMinutes.toIntOrNull() ?: 120,
+                    hall = state.hall.trim(),
+                    seatNumber = state.seatNumber.takeIf { it.isNotBlank() },
+                    syllabusScope = state.syllabusScope.takeIf { it.isNotBlank() },
+                    allowedMaterials = state.allowedMaterials.takeIf { it.isNotBlank() },
+                    roomOverride = state.roomOverride.takeIf { it.isNotBlank() }
+                )
+                
+                if (examId == null) {
+                    examRepository.insertExam(entity)
+                } else {
+                    examRepository.updateExam(entity)
+                }
+                
+                _formState.value = _formState.value.copy(isSaving = false, saveCompleted = true)
+            } catch (_: Exception) {
+                _formState.value = _formState.value.copy(isSaving = false)
             }
-            
-            _formState.value = _formState.value.copy(isSaving = false, saveCompleted = true)
         }
     }
 }

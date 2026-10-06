@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.tanmay.buddie.app-mergeDebugResources-58:/values-bs/values-bs.xml",
+            "outputFile": "com.tanmay.buddie.app-mergeDebugResources-59:/values-bs/values-bs.xml",
             "map": [
                 {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.9\\transforms\\e546ef59c0b29b5d565753c961e23e29\\transformed\\core-1.12.0\\res\\values-bs\\values-bs.xml",

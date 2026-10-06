@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.tanmay.buddie.BatteryGuideBrandTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T12:33:15" hostname="LAPTOP-0JF3IUAT" time="0.025">
+<testsuite name="com.tanmay.buddie.BatteryGuideBrandTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-06T06:16:53" hostname="LAPTOP-0JF3IUAT" time="0.027">
   <properties/>
   <testcase name="testDetectOppoAndRealme" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.021"/>
-  <testcase name="testDetectSamsung" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.0"/>
-  <testcase name="testDetectMotorola" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.001"/>
+  <testcase name="testDetectSamsung" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.001"/>
+  <testcase name="testDetectMotorola" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.0"/>
   <testcase name="testDetectXiaomi" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.0"/>
   <testcase name="testDetectOnePlus" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.0"/>
-  <testcase name="testAllBrandsHaveActionableStepsAndSkinName" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.003"/>
-  <testcase name="testDetectVivoAndIqoo" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.0"/>
+  <testcase name="testAllBrandsHaveActionableStepsAndSkinName" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.004"/>
+  <testcase name="testDetectVivoAndIqoo" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.001"/>
   <testcase name="testDetectFallbackToGeneric" classname="com.tanmay.buddie.BatteryGuideBrandTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

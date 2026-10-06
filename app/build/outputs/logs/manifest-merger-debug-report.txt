@@ -53,6 +53,7 @@ MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\User\.gradle\caches\8.9\
 MERGED from [androidx.customview:customview:1.0.0] C:\Users\User\.gradle\caches\8.9\transforms\98639a6785e79b97f244f39addce86b1\transformed\customview-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.9\transforms\e546ef59c0b29b5d565753c961e23e29\transformed\core-1.12.0\AndroidManifest.xml:17:1-30:12
 MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\f185dbe5f5d118471217ce78ef37dc6f\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-compose:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\38b251e8f08a114e37c41cb919671297\transformed\lifecycle-runtime-compose-2.6.2\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\ce98d4a4732e029f8cbf3c701087ad47\transformed\lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.4] C:\Users\User\.gradle\caches\8.9\transforms\13e5eddfe50c31bf88984bb5a7b7c005\transformed\runtime-saveable-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.runtime:runtime-android:1.5.4] C:\Users\User\.gradle\caches\8.9\transforms\9aefd1ecbaf6e6005d96ba5284a6b537\transformed\runtime-release\AndroidManifest.xml:2:1-7:12
@@ -320,6 +321,8 @@ MERGED from [androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.9\transfo
 MERGED from [androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.9\transforms\e546ef59c0b29b5d565753c961e23e29\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\f185dbe5f5d118471217ce78ef37dc6f\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
 MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\f185dbe5f5d118471217ce78ef37dc6f\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-compose:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\38b251e8f08a114e37c41cb919671297\transformed\lifecycle-runtime-compose-2.6.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-compose:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\38b251e8f08a114e37c41cb919671297\transformed\lifecycle-runtime-compose-2.6.2\AndroidManifest.xml:5:5-44
 MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\ce98d4a4732e029f8cbf3c701087ad47\transformed\lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:20:5-44
 MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\User\.gradle\caches\8.9\transforms\ce98d4a4732e029f8cbf3c701087ad47\transformed\lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.4] C:\Users\User\.gradle\caches\8.9\transforms\13e5eddfe50c31bf88984bb5a7b7c005\transformed\runtime-saveable-release\AndroidManifest.xml:5:5-44

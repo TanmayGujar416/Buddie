@@ -776,6 +776,82 @@ class MoodleSyncEngineTest {
     }
 
     @Test
+    fun mergeEngine_duplicateIncomingItems_insertsOnlyOnce() = runBlocking {
+        val repo = FakeSubmissionRepository()
+        val engine = MoodleMergeEngine(repo)
+
+        val item1 = FilteredMoodleItem(
+            item = FetchedMoodleItem(
+                courseId = 1L,
+                courseName = "DBMS",
+                mappedSubjectId = "sub_dbms",
+                mappedSubjectName = "DBMS",
+                cmid = 5555L,
+                title = "Duplicate Item",
+                dueDate = 1775000000L
+            ),
+            filteredOut = false
+        )
+        val item2 = item1.copy() // Duplicate item with same cmid!
+
+        val result = engine.mergeFilteredItems(listOf(item1, item2))
+        assertEquals(1, result.insertedCount)
+        assertEquals(1, result.totalProcessed)
+
+        val allSubs = repo.getAllMoodleSubmissions()
+        assertEquals(1, allSubs.size)
+        assertEquals(5555L, allSubs[0].moodleAssignmentId)
+    }
+
+    @Test
+    fun mergeEngine_existingDuplicatesInDatabase_purgesRedundantRows() = runBlocking {
+        val dup1 = SubmissionEntity(
+            id = "dup_1",
+            subjectId = "sub_dbms",
+            sessionType = null,
+            title = "Existing Duplicate 1",
+            deadline = java.time.LocalDateTime.now().plusDays(2),
+            status = SubmissionStatus.NOT_STARTED,
+            source = SubmissionSource.MOODLE,
+            moodleAssignmentId = 6666L
+        )
+        val dup2 = SubmissionEntity(
+            id = "dup_2",
+            subjectId = "sub_dbms",
+            sessionType = null,
+            title = "Existing Duplicate 2",
+            deadline = java.time.LocalDateTime.now().plusDays(2),
+            status = SubmissionStatus.DONE, // Has DONE status!
+            source = SubmissionSource.MOODLE,
+            moodleAssignmentId = 6666L
+        )
+
+        val repo = FakeSubmissionRepository(listOf(dup1, dup2))
+        val engine = MoodleMergeEngine(repo)
+
+        val incomingItem = FilteredMoodleItem(
+            item = FetchedMoodleItem(
+                courseId = 1L,
+                courseName = "DBMS",
+                mappedSubjectId = "sub_dbms",
+                mappedSubjectName = "DBMS",
+                cmid = 6666L,
+                title = "Updated Title",
+                dueDate = 1776000000L
+            ),
+            filteredOut = false
+        )
+
+        val result = engine.mergeFilteredItems(listOf(incomingItem))
+        assertEquals(0, result.insertedCount)
+        assertEquals(1, result.updatedCount)
+
+        val remainingSubs = repo.getAllMoodleSubmissions().filter { it.moodleAssignmentId == 6666L }
+        assertEquals(1, remainingSubs.size) // Redundant row purged!
+        assertEquals("dup_2", remainingSubs[0].id) // Kept the completed one!
+    }
+
+    @Test
     fun tokenScanner_extractsRecurringTokens_filtersOutSingleOccurrencesAndStopWords() {
         val items = listOf(
             FetchedMoodleItem(

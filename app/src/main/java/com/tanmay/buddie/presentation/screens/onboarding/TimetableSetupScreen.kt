@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,8 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,9 +58,10 @@ import com.tanmay.buddie.presentation.theme.*
 @Composable
 fun TimetableSetupScreen(
     viewModel: TimetableSetupViewModel = hiltViewModel(),
-    onSetupComplete: () -> Unit
+    onSetupComplete: () -> Unit,
+    onBackClick: (() -> Unit)? = null
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Drag-resize state for visual adjustments on the grid
     var resizingSlotId by remember { mutableStateOf<String?>(null) }
@@ -79,6 +83,13 @@ fun TimetableSetupScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val haptics = rememberAppHaptics()
+    val density = LocalDensity.current
+
+    // Auto-scroll to 8 AM on initial load so user doesn't see empty midnight hours
+    LaunchedEffect(Unit) {
+        val targetY = with(density) { (8 * hourHeight.value).dp.roundToPx() }
+        verticalScrollState.scrollTo(targetY)
+    }
 
     // Memoize overlapping slot layout per day so grid scroll and drag-resize do not repeatedly re-calculate
     val slotsByDay = remember(uiState.slots, resizingSlotId, resizingMinutesOffset) {
@@ -129,18 +140,36 @@ fun TimetableSetupScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Set up your timetable",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                        Text(
-                            text = "Tap cell to add class • Tap class to edit/delete",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
-                        )
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (onBackClick != null) {
+                            IconButton(
+                                onClick = onBackClick,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = TextPrimary
+                                )
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = "Set up your timetable",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "Tap cell to add class • Tap class to edit/delete",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -408,7 +437,7 @@ fun TimetableSetupScreen(
                                                     onVerticalDrag = { change, dragAmount ->
                                                         change.consume()
                                                         accumulatedDragPixels += dragAmount
-                                                        val dpDelta = accumulatedDragPixels / density
+                                                        val dpDelta = accumulatedDragPixels / density.density
                                                         val minutesDelta = (dpDelta * 60f / hourHeight.value).toLong()
                                                         if (minutesDelta != resizingMinutesOffset) {
                                                             resizingMinutesOffset = minutesDelta

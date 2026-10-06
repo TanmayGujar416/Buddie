@@ -28,9 +28,14 @@ class GetMascotMoodUseCase @Inject constructor(
             submissionRepository.getAllSubmissions(),
             examRepository.getAllExams()
         ) { submissions, exams ->
+            val now = java.time.LocalDateTime.now()
             val activeSubmissions = submissions.filter { it.status != SubmissionStatus.DONE && !it.filteredOut && !it.needsReview }
-            val allDeadlines = activeSubmissions.map { it.deadline } + exams.map { it.datetime }
-            MascotMoodHelper.calculateMood(allDeadlines)
+            // Exclude exams that have already concluded so finished exams don't permanently trigger OVERDUE
+            val upcomingOrActiveExams = exams.filter {
+                !it.datetime.plusMinutes(it.durationMinutes.toLong().coerceAtLeast(30L)).isBefore(now)
+            }
+            val allDeadlines = activeSubmissions.map { it.deadline } + upcomingOrActiveExams.map { it.datetime }
+            MascotMoodHelper.calculateMood(allDeadlines, now)
         }.debounce(300L)
     }
 }

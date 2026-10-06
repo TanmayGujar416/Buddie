@@ -11,9 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tanmay.buddie.data.local.entity.SessionType
 import com.tanmay.buddie.presentation.components.DateTimePickerField
 import com.tanmay.buddie.presentation.components.SubjectDropdown
@@ -25,7 +27,7 @@ fun AddEditSubmissionScreen(
     viewModel: AddEditSubmissionViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.saveCompleted) {
         if (uiState.saveCompleted) {
@@ -33,19 +35,27 @@ fun AddEditSubmissionScreen(
         }
     }
 
-    val isSaveEnabled = uiState.title.isNotBlank() && uiState.subjectId != null
+    val isSaveEnabled = uiState.title.isNotBlank() && uiState.subjectId != null && !uiState.isSaving && !uiState.saveCompleted
 
     Scaffold(
         containerColor = CharcoalBackground,
         floatingActionButton = {
-            if (isSaveEnabled) {
+            if (uiState.title.isNotBlank() && uiState.subjectId != null) {
                 FloatingActionButton(
-                    onClick = { viewModel.saveSubmission() },
+                    onClick = { if (isSaveEnabled) viewModel.saveSubmission() },
                     shape = SquircleShape,
-                    containerColor = AccentBlue,
+                    containerColor = if (isSaveEnabled) AccentBlue else AccentBlue.copy(alpha = 0.5f),
                     contentColor = TextPrimary
                 ) {
-                    Icon(Icons.Default.Check, contentDescription = "Save Submission")
+                    if (uiState.isSaving) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(22.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.Check, contentDescription = "Save Submission")
+                    }
                 }
             }
         }
@@ -125,7 +135,8 @@ fun AddEditSubmissionScreen(
                 SubjectDropdown(
                     subjects = uiState.subjects,
                     selectedSubjectId = uiState.subjectId,
-                    onSubjectSelected = { viewModel.updateSubject(it) }
+                    onSubjectSelected = { viewModel.updateSubject(it) },
+                    onCreateSubject = { name, color -> viewModel.createSubject(name, color) }
                 )
 
                 // Session Type Toggle

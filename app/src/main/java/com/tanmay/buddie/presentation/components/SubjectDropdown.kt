@@ -20,9 +20,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tanmay.buddie.data.local.entity.SubjectEntity
 import com.tanmay.buddie.presentation.theme.*
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,10 +50,86 @@ fun SubjectDropdown(
     subjects: List<SubjectEntity>,
     selectedSubjectId: String?,
     onSubjectSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCreateSubject: ((name: String, color: String) -> Unit)? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var showCreateDialog by remember { mutableStateOf(false) }
     val selectedSubject = subjects.find { it.id == selectedSubjectId }
+
+    if (showCreateDialog && onCreateSubject != null) {
+        var newSubjectName by remember { mutableStateOf("") }
+        val colors = listOf(
+            "#448AFF", "#22C55E", "#E040FB", "#FF5252",
+            "#FF9800", "#00BCD4", "#FF4081", "#7C4DFF"
+        )
+        var selectedColor by remember { mutableStateOf(colors[0]) }
+
+        AlertDialog(
+            onDismissRequest = { showCreateDialog = false },
+            containerColor = CharcoalSurface,
+            shape = DialogShape,
+            title = { Text("New Subject", color = TextPrimary, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = newSubjectName,
+                        onValueChange = { newSubjectName = it },
+                        label = { Text("Subject Name") },
+                        placeholder = { Text("e.g. Physics, Data Structures") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = InputFieldShape,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AccentBlueLight,
+                            unfocusedBorderColor = BorderOutline,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedLabelColor = AccentBlueLight,
+                            unfocusedLabelColor = TextSecondary
+                        )
+                    )
+                    Text("Select Color:", style = MaterialTheme.typography.labelMedium, color = TextSecondary)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        items(colors) { colorStr ->
+                            val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch (_: Exception) { AccentBlueLight }
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .border(
+                                        width = if (selectedColor == colorStr) 3.dp else 0.dp,
+                                        color = if (selectedColor == colorStr) Color.White else Color.Transparent,
+                                        shape = CircleShape
+                                    )
+                                    .clickable { selectedColor = colorStr }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newSubjectName.isNotBlank()) {
+                            onCreateSubject(newSubjectName.trim(), selectedColor)
+                            showCreateDialog = false
+                        }
+                    },
+                    shape = ButtonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)
+                ) {
+                    Text("Create", color = TextPrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCreateDialog = false }) {
+                    Text("Cancel", color = TextSecondary)
+                }
+            }
+        )
+    }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -71,18 +167,39 @@ fun SubjectDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(CharcoalSurfaceElevated)
         ) {
-            subjects.forEach { subject ->
-                val colorStr = subject.color ?: "#888888"
-                val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch (_: Exception) { AccentBlueLight }
-
+            if (subjects.isEmpty()) {
                 DropdownMenuItem(
-                    text = { Text(subject.name, color = TextPrimary) },
+                    text = { Text("No subjects yet", color = TextSecondary) },
+                    onClick = {}
+                )
+            } else {
+                subjects.forEach { subject ->
+                    val colorStr = subject.color ?: "#888888"
+                    val color = try { Color(android.graphics.Color.parseColor(colorStr)) } catch (_: Exception) { AccentBlueLight }
+
+                    DropdownMenuItem(
+                        text = { Text(subject.name, color = TextPrimary) },
+                        leadingIcon = {
+                            Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(color))
+                        },
+                        onClick = {
+                            onSubjectSelected(subject.id)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+
+            if (onCreateSubject != null) {
+                Divider(color = DividerFaint)
+                DropdownMenuItem(
+                    text = { Text("+ Create New Subject", color = AccentBlueLight, fontWeight = FontWeight.SemiBold) },
                     leadingIcon = {
-                        Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(color))
+                        Icon(Icons.Default.Add, contentDescription = null, tint = AccentBlueLight, modifier = Modifier.size(18.dp))
                     },
                     onClick = {
-                        onSubjectSelected(subject.id)
                         expanded = false
+                        showCreateDialog = true
                     }
                 )
             }

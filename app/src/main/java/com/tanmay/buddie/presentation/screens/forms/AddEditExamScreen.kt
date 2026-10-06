@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tanmay.buddie.presentation.components.DateTimePickerField
 import com.tanmay.buddie.presentation.components.SubjectDropdown
 import com.tanmay.buddie.presentation.theme.*
@@ -24,7 +25,7 @@ fun AddEditExamScreen(
     viewModel: AddEditExamViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.saveCompleted) {
         if (uiState.saveCompleted) {
@@ -124,7 +125,8 @@ fun AddEditExamScreen(
                 SubjectDropdown(
                     subjects = uiState.subjects,
                     selectedSubjectId = uiState.subjectId,
-                    onSubjectSelected = { viewModel.updateField(subjectId = it) }
+                    onSubjectSelected = { viewModel.updateField(subjectId = it) },
+                    onCreateSubject = { name, color -> viewModel.createSubject(name, color) }
                 )
 
                 DateTimePickerField(

@@ -153,7 +153,8 @@ class BubbleService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedState
                             getMascotMoodUseCase,
                             userPreferences,
                             filterCodeRepository,
-                            syncEngine
+                            syncEngine,
+                            timetableRepository
                         ) as T
                     modelClass.isAssignableFrom(TimetableViewModel::class.java) ->
                         TimetableViewModel(timetableRepository, subjectRepository) as T
